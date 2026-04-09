@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateSessionCode } from "@/lib/shuffle";
 import { toast } from "sonner";
-import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy } from "lucide-react";
+import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
@@ -122,6 +122,34 @@ const Admin = () => {
     URL.revokeObjectURL(url);
     toast.success("Results exported!");
   };
+  const regenerateQuiz = async () => {
+    if (!selectedSession) return;
+    setCreating(true);
+    try {
+      const size = selectedSession.question_ids.length;
+      const { data: questions } = await supabase.from("quiz_questions").select("id");
+      if (!questions || questions.length < size) {
+        toast.error("Not enough questions");
+        return;
+      }
+      const shuffled = [...questions].sort(() => Math.random() - 0.5);
+      const newIds = shuffled.slice(0, size).map((q) => q.id);
+      const { error } = await supabase
+        .from("quiz_sessions")
+        .update({ question_ids: newIds })
+        .eq("id", selectedSession.id);
+      if (error) {
+        toast.error("Failed to regenerate quiz");
+        console.error(error);
+      } else {
+        setSelectedSession({ ...selectedSession, question_ids: newIds });
+        toast.success("Quiz regenerated with new questions! Same link works.");
+        fetchSessions();
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handlePasscode = (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,7 +208,10 @@ const Admin = () => {
               {new Date(selectedSession.created_at).toLocaleDateString()} · {selectedSession.question_ids.length} Qs
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={regenerateQuiz} disabled={creating} className="gap-1.5 text-xs h-8">
+              {creating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Regenerate
+            </Button>
             <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-1.5 text-xs h-8">
               <Download className="w-3 h-3" /> Export
             </Button>
