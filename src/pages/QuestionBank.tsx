@@ -28,10 +28,7 @@ const QuestionBank = () => {
 
   useEffect(() => {
     const fetchQuestions = async () => {
-      const { data } = await supabase
-        .from("quiz_questions")
-        .select("*")
-        .order("topic");
+      const { data } = await supabase.from("quiz_questions").select("*").order("topic");
       if (data) setQuestions(data);
       setLoading(false);
     };
@@ -47,10 +44,7 @@ const QuestionBank = () => {
   const filtered = useMemo(() => {
     return questions.filter((q) => {
       const matchesTopic = topicFilter === "all" || q.topic === topicFilter;
-      const matchesSearch =
-        !search ||
-        q.question.toLowerCase().includes(search.toLowerCase()) ||
-        q.topic.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch = !search || q.question.toLowerCase().includes(search.toLowerCase()) || q.topic.toLowerCase().includes(search.toLowerCase());
       return matchesTopic && matchesSearch;
     });
   }, [questions, topicFilter, search]);
@@ -74,44 +68,36 @@ const QuestionBank = () => {
   };
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
-      <div className="fixed top-4 right-4 z-20">
-        <DarkModeToggle />
-      </div>
+    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto nature-gradient">
+      <div className="fixed top-4 right-4 z-20"><DarkModeToggle /></div>
 
       <Link to="/admin" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
       </Link>
 
-      <div className="mb-6">
+      <div className="mb-6 animate-fade-up">
         <div className="flex items-center gap-2 mb-1">
-          <BookOpen className="w-5 h-5 text-primary" />
-          <h1 className="text-xl font-bold">Question Bank</h1>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-500 flex items-center justify-center">
+            <BookOpen className="w-4 h-4 text-white" />
+          </div>
+          <h1 className="text-xl font-bold font-display">Question Bank</h1>
         </div>
         <p className="text-xs text-muted-foreground">{questions.length} questions across {topics.length} topics</p>
       </div>
 
-      {/* Filters */}
       <div className="flex gap-2 mb-5">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-          <Input
-            placeholder="Search questions..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 h-9 text-sm"
-          />
+          <Input placeholder="Search questions..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 text-sm rounded-xl" />
         </div>
         <Select value={topicFilter} onValueChange={setTopicFilter}>
-          <SelectTrigger className="w-40 h-9 text-xs">
+          <SelectTrigger className="w-40 h-9 text-xs rounded-xl">
             <SelectValue placeholder="All topics" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All topics ({questions.length})</SelectItem>
             {topics.map(([topic, count]) => (
-              <SelectItem key={topic} value={topic}>
-                {topic} ({count})
-              </SelectItem>
+              <SelectItem key={topic} value={topic}>{topic} ({count})</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -120,25 +106,25 @@ const QuestionBank = () => {
       {loading ? (
         <div className="text-center py-16 text-sm text-muted-foreground">Loading questions…</div>
       ) : filtered.length === 0 ? (
-        <Card className="glass-card">
+        <Card className="glass-card rounded-2xl">
           <CardContent className="py-16 text-center">
             <Search className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
-            <p className="text-sm font-medium">No questions found</p>
+            <p className="text-sm font-medium font-display">No questions found</p>
             <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter</p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-2">
-          {groupedByTopic.map(([topic, qs]) => {
+          {groupedByTopic.map(([topic, qs], i) => {
             const isExpanded = expandedTopics.has(topic);
             return (
-              <Card key={topic} className="glass-card overflow-hidden">
+              <Card key={topic} className="glass-card overflow-hidden rounded-2xl animate-fade-up" style={{ animationDelay: `${Math.min(i * 40, 400)}ms`, animationFillMode: "both" }}>
                 <button
                   onClick={() => toggleTopic(topic)}
                   className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors"
                 >
                   <div>
-                    <p className="text-sm font-semibold">{topic}</p>
+                    <p className="text-sm font-semibold font-display">{topic}</p>
                     <p className="text-[10px] text-muted-foreground">{qs.length} question{qs.length !== 1 ? "s" : ""}</p>
                   </div>
                   {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
@@ -151,16 +137,16 @@ const QuestionBank = () => {
                           <span className="text-muted-foreground mr-1">{idx + 1}.</span>
                           {q.question}
                         </p>
-                        <div className="grid grid-cols-2 gap-1.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                           {(["A", "B", "C", "D"] as const).map((key) => {
                             const text = q[`option_${key.toLowerCase()}` as keyof Question] as string;
                             const isCorrect = q.correct_answer === key;
                             return (
                               <div
                                 key={key}
-                                className={`rounded-md px-2 py-1.5 text-[11px] ${
+                                className={`rounded-xl px-2.5 py-1.5 text-[11px] ${
                                   isCorrect
-                                    ? "bg-success/10 text-success font-medium border border-success/20"
+                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium border border-emerald-200 dark:border-emerald-800/30"
                                     : "bg-muted/50 text-muted-foreground"
                                 }`}
                               >

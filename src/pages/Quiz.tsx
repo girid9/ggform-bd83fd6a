@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { BookOpen, CheckCircle2, XCircle, ArrowRight, GraduationCap, Loader2 } from "lucide-react";
+import { BookOpen, CheckCircle2, XCircle, ArrowRight, Leaf, Loader2 } from "lucide-react";
 import { FloatingInput } from "@/components/FloatingInput";
 import { StepProgress } from "@/components/StepProgress";
 import { SuccessScreen } from "@/components/SuccessScreen";
@@ -148,10 +148,9 @@ const Quiz = () => {
     setSubmitting(false);
   };
 
-  // --- LOADING ---
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center nature-gradient">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-sm text-muted-foreground">Loading quiz…</p>
@@ -160,16 +159,15 @@ const Quiz = () => {
     );
   }
 
-  // --- ERROR ---
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-5">
-        <Card className="w-full max-w-sm text-center glass-card">
+      <div className="flex min-h-screen items-center justify-center px-5 nature-gradient">
+        <Card className="w-full max-w-sm text-center glass-card rounded-2xl">
           <CardContent className="py-12">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-destructive/10 mb-4">
               <XCircle className="w-7 h-7 text-destructive" />
             </div>
-            <p className="text-base font-semibold mb-1">Quiz Not Found</p>
+            <p className="text-base font-semibold font-display mb-1">Quiz Not Found</p>
             <p className="text-sm text-muted-foreground">{error}</p>
           </CardContent>
         </Card>
@@ -177,32 +175,24 @@ const Quiz = () => {
     );
   }
 
-  // --- NAME ENTRY ---
   if (phase === "name") {
     return (
-      <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
-        <div className="absolute top-4 right-4">
-          <DarkModeToggle />
-        </div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -z-10" />
-        <Card className="w-full max-w-sm glass-card animate-fade-up">
+      <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden nature-gradient">
+        <div className="absolute top-4 right-4"><DarkModeToggle /></div>
+        <div className="absolute top-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-emerald-200/40 dark:bg-emerald-900/15 blur-3xl -z-10" />
+        <Card className="w-full max-w-sm glass-card animate-fade-up rounded-2xl">
           <CardHeader className="text-center pb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 mx-auto mb-3">
-              <GraduationCap className="w-8 h-8 text-primary-foreground" />
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-500 shadow-lg shadow-emerald-600/20 mx-auto mb-3">
+              <Leaf className="w-8 h-8 text-white" />
             </div>
-            <CardTitle className="text-xl">ICTSM Quiz</CardTitle>
+            <CardTitle className="text-xl font-display">ICTSM Quiz</CardTitle>
             <CardDescription className="text-sm">Enter your name to begin</CardDescription>
           </CardHeader>
           <CardContent>
             <StepProgress currentStep={1} totalSteps={3} labels={STEP_LABELS} />
             <form onSubmit={handleNameSubmit} className="space-y-4">
-              <FloatingInput
-                label="Your full name"
-                value={studentName}
-                onChange={(e) => setStudentName(e.target.value)}
-                autoFocus
-              />
-              <Button type="submit" className="w-full h-11 font-semibold">
+              <FloatingInput label="Your full name" value={studentName} onChange={(e) => setStudentName(e.target.value)} autoFocus />
+              <Button type="submit" className="w-full h-11 font-semibold bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 rounded-xl shadow-sm">
                 Continue
               </Button>
             </form>
@@ -212,19 +202,15 @@ const Quiz = () => {
     );
   }
 
-  // --- STUDY MODE ---
   if (phase === "study") {
     return (
-      <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
-        <div className="absolute top-4 right-4 fixed z-20">
-          <DarkModeToggle />
-        </div>
-        {/* Header */}
-        <div className="text-center mb-4">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-3 py-1 text-xs font-semibold mb-3">
+      <div className="min-h-screen px-4 py-6 max-w-xl mx-auto nature-gradient">
+        <div className="fixed top-4 right-4 z-20"><DarkModeToggle /></div>
+        <div className="text-center mb-4 animate-fade-up">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 px-3 py-1 text-xs font-semibold mb-3">
             <BookOpen className="w-3.5 h-3.5" /> Study Mode
           </span>
-          <h1 className="text-xl font-bold">Review & Learn</h1>
+          <h1 className="text-xl font-bold font-display">Review & Learn</h1>
           <p className="text-muted-foreground text-xs mt-1">
             Read through all {questions.length} questions with correct answers shown
           </p>
@@ -234,10 +220,10 @@ const Quiz = () => {
 
         <div className="space-y-3 mb-24">
           {questions.map((q, idx) => (
-            <Card key={q.id} className="glass-card">
+            <Card key={q.id} className="glass-card rounded-2xl animate-fade-up" style={{ animationDelay: `${Math.min(idx * 30, 300)}ms`, animationFillMode: "both" }}>
               <CardContent className="pt-4 pb-3.5">
                 <div className="flex items-start gap-2.5 mb-2.5">
-                  <span className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md bg-primary/10 text-primary text-xs font-bold">
+                  <span className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10 text-primary text-xs font-bold">
                     {idx + 1}
                   </span>
                   <p className="text-sm font-medium leading-snug">{q.question}</p>
@@ -250,7 +236,7 @@ const Quiz = () => {
                     return (
                       <div
                         key={key}
-                        className={`rounded-lg border px-3 py-2 text-xs transition-colors ${
+                        className={`rounded-xl border px-3 py-2 text-xs transition-colors ${
                           isCorrect
                             ? "border-success/40 bg-success/8 text-success font-semibold"
                             : "border-border/60 text-muted-foreground"
@@ -272,7 +258,7 @@ const Quiz = () => {
           <div className="max-w-xl mx-auto">
             <Button
               size="lg"
-              className="w-full h-12 gap-2 font-semibold shadow-lg shadow-primary/15"
+              className="w-full h-12 gap-2 font-semibold shadow-lg shadow-emerald-600/15 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 rounded-xl"
               onClick={() => setPhase("quiz")}
             >
               I'm Ready — Start Quiz <ArrowRight className="w-4.5 h-4.5" />
@@ -283,21 +269,17 @@ const Quiz = () => {
     );
   }
 
-  // --- QUIZ MODE ---
   if (phase === "quiz") {
     const answeredCount = Object.keys(answers).length;
     const progressPct = (answeredCount / questions.length) * 100;
 
     return (
-      <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
-        <div className="absolute top-4 right-4 fixed z-20">
-          <DarkModeToggle />
-        </div>
-        {/* Sticky header with progress */}
+      <div className="min-h-screen px-4 py-6 max-w-xl mx-auto nature-gradient">
+        <div className="fixed top-4 right-4 z-20"><DarkModeToggle /></div>
         <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-md pb-4 -mx-4 px-4 pt-2">
           <StepProgress currentStep={3} totalSteps={3} labels={STEP_LABELS} />
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-lg font-bold">Quiz</h1>
+            <h1 className="text-lg font-bold font-display">Quiz</h1>
             <span className="text-xs font-semibold text-muted-foreground bg-secondary rounded-full px-2.5 py-1">
               {answeredCount}/{questions.length}
             </span>
@@ -310,10 +292,10 @@ const Quiz = () => {
             const opts = shuffledOptions[q.id] || [];
             const isAnswered = !!answers[q.id];
             return (
-              <Card key={q.id} className={`transition-all ${isAnswered ? "border-primary/25 glass-card" : "glass-card"}`}>
+              <Card key={q.id} className={`transition-all rounded-2xl ${isAnswered ? "border-primary/25 glass-card" : "glass-card"}`}>
                 <CardContent className="pt-4 pb-3.5">
                   <div className="flex items-start gap-2.5 mb-3">
-                    <span className={`flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs font-bold ${isAnswered ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
+                    <span className={`flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-bold ${isAnswered ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
                       {idx + 1}
                     </span>
                     <p className="text-sm font-medium leading-snug">{q.question}</p>
@@ -325,7 +307,7 @@ const Quiz = () => {
                         <button
                           key={opt.originalKey}
                           onClick={() => selectAnswer(q.id, opt.originalKey)}
-                          className={`rounded-lg border px-3 py-2.5 text-xs text-left transition-all ${
+                          className={`rounded-xl border px-3 py-2.5 text-xs text-left transition-all min-h-[44px] ${
                             selected
                               ? "border-primary bg-primary/10 font-semibold text-primary"
                               : "border-border/60 text-foreground hover:border-primary/30 hover:bg-primary/5"
@@ -347,14 +329,12 @@ const Quiz = () => {
           <div className="max-w-xl mx-auto">
             <Button
               size="lg"
-              className="w-full h-12 font-semibold shadow-lg shadow-primary/15"
+              className="w-full h-12 font-semibold shadow-lg shadow-emerald-600/15 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 rounded-xl"
               onClick={submitQuiz}
               disabled={submitting}
             >
               {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" /> Submitting…
-                </>
+                <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Submitting…</>
               ) : (
                 "Submit Quiz"
               )}
@@ -370,22 +350,16 @@ const Quiz = () => {
   const passed = percentage >= 60;
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
-      <div className="fixed top-4 right-4 z-20">
-        <DarkModeToggle />
-      </div>
+    <div className="min-h-screen px-4 py-6 max-w-xl mx-auto nature-gradient">
+      <div className="fixed top-4 right-4 z-20"><DarkModeToggle /></div>
       
-      {/* Success header card */}
-      <Card className="mb-6 text-center glass-card overflow-hidden animate-scale-in">
-        <div className={`h-1.5 w-full ${passed ? "bg-success" : "bg-destructive"}`} />
+      <Card className="mb-6 text-center glass-card overflow-hidden animate-bounce-in rounded-2xl">
+        <div className={`h-1.5 w-full ${passed ? "bg-emerald-500" : "bg-red-500"}`} />
         <CardContent className="py-8">
-          {/* Animated checkmark or X */}
           <svg className="w-16 h-16 mx-auto mb-3" viewBox="0 0 64 64" fill="none">
-            <circle
-              cx="32" cy="32" r="28"
+            <circle cx="32" cy="32" r="28"
               stroke={passed ? "hsl(var(--success))" : "hsl(var(--destructive))"}
-              strokeWidth="2.5"
-              strokeLinecap="round"
+              strokeWidth="2.5" strokeLinecap="round"
               style={{ strokeDasharray: 176, strokeDashoffset: 0, animation: "draw-circle 0.6s ease-out" }}
             />
             {passed ? (
@@ -398,10 +372,10 @@ const Quiz = () => {
               </>
             )}
           </svg>
-          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${passed ? "bg-success/10" : "bg-destructive/10"}`}>
-            <span className={`text-3xl font-extrabold ${passed ? "text-success" : "text-destructive"}`}>{percentage}%</span>
+          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${passed ? "bg-emerald-100 dark:bg-emerald-900/30" : "bg-red-100 dark:bg-red-900/30"}`}>
+            <span className={`text-3xl font-extrabold font-display ${passed ? "text-emerald-700 dark:text-emerald-300" : "text-red-600 dark:text-red-300"}`}>{percentage}%</span>
           </div>
-          <h1 className="text-xl font-bold mb-1">
+          <h1 className="text-xl font-bold font-display mb-1">
             {passed ? "Well Done! 🎉" : "Keep Studying! 📚"}
           </h1>
           <p className="text-sm text-muted-foreground">
@@ -410,16 +384,16 @@ const Quiz = () => {
         </CardContent>
       </Card>
 
-      <h2 className="text-base font-bold mb-3">Answer Review</h2>
+      <h2 className="text-base font-bold font-display mb-3">Answer Review</h2>
       <div className="space-y-3">
         {questions.map((q, idx) => {
           const studentAnswer = answers[q.id];
           const isCorrect = studentAnswer === q.correct_answer;
           return (
-            <Card key={q.id} className={`glass-card ${isCorrect ? "border-success/25" : "border-destructive/25"}`}>
+            <Card key={q.id} className={`glass-card rounded-2xl ${isCorrect ? "border-success/25" : "border-destructive/25"}`}>
               <CardContent className="pt-4 pb-3.5">
                 <div className="flex items-start gap-2.5 mb-2.5">
-                  <div className={`flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs font-bold ${isCorrect ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
+                  <div className={`flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-bold ${isCorrect ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300"}`}>
                     {isCorrect ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
                   </div>
                   <p className="text-sm font-medium leading-snug">
@@ -434,12 +408,10 @@ const Quiz = () => {
                     const isStudentPick = studentAnswer === key;
                     let cls = "border-border/60 text-muted-foreground";
                     if (isThisCorrect) cls = "border-success/40 bg-success/8 text-success font-semibold";
-                    else if (isStudentPick) cls = "border-destructive/40 bg-destructive/8 text-destructive";
+                    else if (isStudentPick && !isThisCorrect) cls = "border-destructive/40 bg-destructive/8 text-destructive";
                     return (
-                      <div key={key} className={`rounded-lg border px-3 py-1.5 text-xs ${cls}`}>
-                        <span className="font-semibold mr-1">{key}.</span> {text}
-                        {isThisCorrect && <CheckCircle2 className="w-3 h-3 inline ml-1 -mt-0.5" />}
-                        {isStudentPick && !isThisCorrect && <XCircle className="w-3 h-3 inline ml-1 -mt-0.5" />}
+                      <div key={key} className={`rounded-xl border px-3 py-2 text-xs transition-colors ${cls}`}>
+                        <span className="font-semibold mr-1.5">{key}.</span>{text}
                       </div>
                     );
                   })}

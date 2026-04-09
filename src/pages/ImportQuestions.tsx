@@ -238,7 +238,7 @@ const ImportQuestions = () => {
   };
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
+    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto nature-gradient">
       <div className="fixed top-4 right-4 z-20">
         <DarkModeToggle />
       </div>
