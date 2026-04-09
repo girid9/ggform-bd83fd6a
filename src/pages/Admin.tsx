@@ -232,9 +232,8 @@ const Admin = () => {
 
         {attempts.length === 0 ? (
           <Card className="glass-card">
-            <CardContent className="py-16 text-center">
-              <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No students have taken this quiz yet</p>
+            <CardContent className="py-0">
+              <EmptyState icon="students" title="No responses yet" description="Share the quiz link with students to see their results here" />
             </CardContent>
           </Card>
         ) : (
@@ -287,11 +286,14 @@ const Admin = () => {
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Home</Link>
           <h1 className="text-xl font-bold mt-1">Tutor Dashboard</h1>
         </div>
-        <Link to="/analytics">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0">
-            <BarChart3 className="w-3.5 h-3.5" /> Analytics
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <DarkModeToggle />
+          <Link to="/analytics">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0">
+              <BarChart3 className="w-3.5 h-3.5" /> Analytics
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Create Quiz */}
@@ -319,11 +321,8 @@ const Admin = () => {
 
       {sessions.length === 0 ? (
         <Card className="glass-card">
-          <CardContent className="py-16 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-secondary mb-3">
-              <Plus className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No quizzes yet. Create your first one!</p>
+          <CardContent className="py-0">
+            <EmptyState icon="quiz" title="No quizzes yet" description="Create your first quiz to get started" actionLabel="Create Quiz" onAction={createQuiz} />
           </CardContent>
         </Card>
       ) : (
