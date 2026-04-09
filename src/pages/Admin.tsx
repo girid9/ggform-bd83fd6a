@@ -151,7 +151,7 @@ const Admin = () => {
     }
   };
 
-
+  const handlePasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (passcode === ADMIN_PASSCODE) {
       setAuthenticated(true);
