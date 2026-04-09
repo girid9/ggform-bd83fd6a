@@ -4,7 +4,7 @@ import { BookOpen, Shield, GraduationCap, Brain } from "lucide-react";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-5 py-12 relative overflow-hidden">
+    <div className="flex min-h-screen flex-col items-center justify-center px-5 py-12 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50">
       {/* Subtle background decoration */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl -z-10" />
       <div className="absolute bottom-0 right-0 w-[300px] h-[300px] rounded-full bg-accent/5 blur-3xl -z-10" />
