@@ -24,6 +24,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/questions" element={<QuestionBank />} />
+          <Route path="/import" element={<ImportQuestions />} />
           <Route path="/quiz/:code" element={<Quiz />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -450,11 +450,16 @@ const Admin = () => {
         </Card>
       )}
 
-      {/* Question Bank link */}
-      <div className="mb-4">
-        <Link to="/questions">
+      {/* Question Bank & Import links */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-4">
+        <Link to="/questions" className="flex-1">
           <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full">
-            <BookOpen className="w-3.5 h-3.5" /> Browse Question Bank
+            <BookOpen className="w-3.5 h-3.5" /> Question Bank
+          </Button>
+        </Link>
+        <Link to="/import" className="flex-1">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full">
+            <Plus className="w-3.5 h-3.5" /> Import Questions
           </Button>
         </Link>
       </div>
