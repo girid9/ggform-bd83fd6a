@@ -42,67 +42,67 @@ const StudentDetail = ({ attempt, questionIds, onBack }: Props) => {
   }, [questionIds]);
 
   const percentage = Math.round((attempt.score / attempt.total_questions) * 100);
+  const passed = percentage >= 60;
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
-      <Button variant="ghost" onClick={onBack} className="mb-4 gap-2">
+    <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
+      <Button variant="ghost" size="sm" onClick={onBack} className="mb-4 gap-1.5 text-muted-foreground hover:text-foreground -ml-2">
         <ArrowLeft className="w-4 h-4" /> Back
       </Button>
 
-      <Card className="mb-6 text-center">
+      <Card className="mb-6 text-center glass-card overflow-hidden">
+        <div className={`h-1.5 w-full ${passed ? "bg-success" : "bg-destructive"}`} />
         <CardContent className="py-6">
-          <h2 className="text-xl font-bold mb-1">{attempt.student_name}</h2>
-          <p className="text-muted-foreground text-sm mb-3">
+          <h2 className="text-lg font-bold mb-0.5">{attempt.student_name}</h2>
+          <p className="text-muted-foreground text-xs mb-3">
             {new Date(attempt.created_at).toLocaleString()}
           </p>
           <div
             className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${
-              percentage >= 60 ? "bg-success/10" : "bg-destructive/10"
+              passed ? "bg-success/10" : "bg-destructive/10"
             }`}
           >
-            <span className={`text-2xl font-bold ${percentage >= 60 ? "text-success" : "text-destructive"}`}>
+            <span className={`text-2xl font-extrabold ${passed ? "text-success" : "text-destructive"}`}>
               {percentage}%
             </span>
           </div>
-          <p className="mt-2 font-medium">
+          <p className="mt-2 text-sm font-semibold">
             {attempt.score}/{attempt.total_questions} correct
           </p>
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {questions.map((q, idx) => {
           const studentAnswer = attempt.answers[q.id];
           const isCorrect = studentAnswer === q.correct_answer;
           return (
-            <Card key={q.id} className={isCorrect ? "border-success/30" : "border-destructive/30"}>
-              <CardContent className="pt-5 pb-4">
-                <div className="flex items-start gap-2 mb-3">
-                  {isCorrect ? (
-                    <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-                  )}
+            <Card key={q.id} className={`glass-card ${isCorrect ? "border-success/25" : "border-destructive/25"}`}>
+              <CardContent className="pt-4 pb-3.5">
+                <div className="flex items-start gap-2.5 mb-2.5">
+                  <div className={`flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-xs font-bold ${isCorrect ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}>
+                    {isCorrect ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
+                  </div>
                   <div>
-                    <p className="font-medium">
-                      <span className="text-primary font-bold">Q{idx + 1}.</span> {q.question}
+                    <p className="text-sm font-medium leading-snug">
+                      <span className="text-muted-foreground mr-1">Q{idx + 1}.</span> {q.question}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{q.topic}</p>
+                    <p className="text-[10px] text-muted-foreground/70 mt-0.5 uppercase tracking-wide">{q.topic}</p>
                   </div>
                 </div>
-                <div className="grid gap-1.5 ml-7">
+                <div className="grid gap-1.5 ml-[34px]">
                   {(["A", "B", "C", "D"] as const).map((key) => {
                     const text = q[`option_${key.toLowerCase()}` as keyof Question] as string;
                     const isThisCorrect = q.correct_answer === key;
                     const isStudentPick = studentAnswer === key;
-                    let cls = "border-border";
-                    if (isThisCorrect) cls = "border-success bg-success/10 text-success font-semibold";
-                    else if (isStudentPick) cls = "border-destructive bg-destructive/10 text-destructive";
+                    let cls = "border-border/60 text-muted-foreground";
+                    if (isThisCorrect) cls = "border-success/40 bg-success/8 text-success font-semibold";
+                    else if (isStudentPick) cls = "border-destructive/40 bg-destructive/8 text-destructive";
                     return (
-                      <div key={key} className={`rounded-lg border px-3 py-1.5 text-sm ${cls}`}>
-                        <span className="font-semibold mr-1">({key})</span> {text}
-                        {isThisCorrect && " ✓"}
-                        {isStudentPick && !isThisCorrect && " ✗"}
+                      <div key={key} className={`rounded-lg border px-3 py-1.5 text-xs ${cls}`}>
+                        <span className="font-semibold mr-1">{key}.</span> {text}
+                        {isThisCorrect && <CheckCircle2 className="w-3 h-3 inline ml-1 -mt-0.5" />}
+                        {isStudentPick && !isThisCorrect && <XCircle className="w-3 h-3 inline ml-1 -mt-0.5" />}
                       </div>
                     );
                   })}
