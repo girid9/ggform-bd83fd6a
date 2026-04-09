@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateSessionCode } from "@/lib/shuffle";
 import { toast } from "sonner";
-import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw } from "lucide-react";
+import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw, BookOpen, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
@@ -42,6 +42,11 @@ const Admin = () => {
   const [selectedStudent, setSelectedStudent] = useState<QuizAttempt | null>(null);
   const [creating, setCreating] = useState(false);
   const [quizSize, setQuizSize] = useState("20");
+  const [quizMode, setQuizMode] = useState<"random" | "topic">("random");
+  const [topics, setTopics] = useState<{ topic: string; count: number }[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState("all");
+  const [previewQuestions, setPreviewQuestions] = useState<{ id: string; question: string; topic: string }[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     if (authenticated) fetchSessions();
