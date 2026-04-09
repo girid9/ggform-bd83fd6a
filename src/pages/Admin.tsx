@@ -165,7 +165,8 @@ const Admin = () => {
 
   if (!authenticated) {
     return (
-       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50">
+       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+         <div className="absolute top-4 right-4"><DarkModeToggle /></div>
          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -z-10" />
          <Card className="w-full max-w-sm glass-card animate-fade-up">
           <CardHeader className="text-center pb-4">
@@ -177,7 +178,7 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasscode} className="space-y-4">
-              <Input type="password" placeholder="Enter passcode" value={passcode} onChange={(e) => setPasscode(e.target.value)} className="h-11" />
+              <FloatingInput type="password" label="Enter passcode" value={passcode} onChange={(e) => setPasscode(e.target.value)} />
               <Button type="submit" className="w-full h-11 font-semibold">Unlock</Button>
             </form>
           </CardContent>
