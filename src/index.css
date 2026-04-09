@@ -6,35 +6,35 @@
 
 @layer base {
   :root {
-    --background: 230 25% 97%;
-    --foreground: 230 25% 10%;
+    --background: 0 0% 99%;
+    --foreground: 224 20% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 230 25% 10%;
+    --card-foreground: 224 20% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 230 25% 10%;
+    --popover-foreground: 224 20% 12%;
 
-    --primary: 243 75% 59%;
+    --primary: 258 90% 62%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 230 20% 94%;
-    --secondary-foreground: 230 25% 10%;
+    --secondary: 258 30% 96%;
+    --secondary-foreground: 224 20% 12%;
 
-    --muted: 230 15% 93%;
-    --muted-foreground: 230 10% 46%;
+    --muted: 258 15% 93%;
+    --muted-foreground: 224 10% 46%;
 
-    --accent: 160 60% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 258 60% 95%;
+    --accent-foreground: 224 20% 12%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 230 15% 90%;
-    --input: 230 15% 90%;
-    --ring: 243 75% 59%;
+    --border: 258 15% 90%;
+    --input: 258 15% 90%;
+    --ring: 258 90% 62%;
 
-    --radius: 0.875rem;
+    --radius: 0.75rem;
 
     --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
@@ -103,7 +103,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Inter', system-ui, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
