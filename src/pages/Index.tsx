@@ -1,10 +1,14 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Shield, GraduationCap, Brain } from "lucide-react";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-5 py-12 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50">
+     <div className="flex min-h-screen flex-col items-center justify-center px-5 py-12 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+      <div className="absolute top-4 right-4">
+        <DarkModeToggle />
+      </div>
       {/* Subtle background decoration */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-3xl -z-10" />
       <div className="absolute bottom-0 right-0 w-[300px] h-[300px] rounded-full bg-accent/5 blur-3xl -z-10" />

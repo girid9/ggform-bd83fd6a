@@ -11,6 +11,9 @@ import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, 
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
+import { FloatingInput } from "@/components/FloatingInput";
+import { EmptyState } from "@/components/EmptyState";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 const ADMIN_PASSCODE = "ictsm2025";
 
@@ -162,7 +165,8 @@ const Admin = () => {
 
   if (!authenticated) {
     return (
-       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50">
+       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+         <div className="absolute top-4 right-4"><DarkModeToggle /></div>
          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -z-10" />
          <Card className="w-full max-w-sm glass-card animate-fade-up">
           <CardHeader className="text-center pb-4">
@@ -174,7 +178,7 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasscode} className="space-y-4">
-              <Input type="password" placeholder="Enter passcode" value={passcode} onChange={(e) => setPasscode(e.target.value)} className="h-11" />
+              <FloatingInput type="password" label="Enter passcode" value={passcode} onChange={(e) => setPasscode(e.target.value)} />
               <Button type="submit" className="w-full h-11 font-semibold">Unlock</Button>
             </form>
           </CardContent>
@@ -228,9 +232,8 @@ const Admin = () => {
 
         {attempts.length === 0 ? (
           <Card className="glass-card">
-            <CardContent className="py-16 text-center">
-              <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">No students have taken this quiz yet</p>
+            <CardContent className="py-0">
+              <EmptyState icon="students" title="No responses yet" description="Share the quiz link with students to see their results here" />
             </CardContent>
           </Card>
         ) : (
@@ -283,11 +286,14 @@ const Admin = () => {
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Home</Link>
           <h1 className="text-xl font-bold mt-1">Tutor Dashboard</h1>
         </div>
-        <Link to="/analytics">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0">
-            <BarChart3 className="w-3.5 h-3.5" /> Analytics
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <DarkModeToggle />
+          <Link to="/analytics">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0">
+              <BarChart3 className="w-3.5 h-3.5" /> Analytics
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Create Quiz */}
@@ -315,11 +321,8 @@ const Admin = () => {
 
       {sessions.length === 0 ? (
         <Card className="glass-card">
-          <CardContent className="py-16 text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-secondary mb-3">
-              <Plus className="w-5 h-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">No quizzes yet. Create your first one!</p>
+          <CardContent className="py-0">
+            <EmptyState icon="quiz" title="No quizzes yet" description="Create your first quiz to get started" actionLabel="Create Quiz" onAction={createQuiz} />
           </CardContent>
         </Card>
       ) : (
