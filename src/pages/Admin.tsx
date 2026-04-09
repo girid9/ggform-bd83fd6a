@@ -85,7 +85,64 @@ const Admin = () => {
     if (data) setAttempts(data as QuizAttempt[]);
   };
 
-  const createQuiz = async () => {
+  const generatePreview = async () => {
+    const size = parseInt(quizSize);
+    const query = supabase.from("quiz_questions").select("id, question, topic");
+    if (quizMode === "topic" && selectedTopic !== "all") {
+      query.eq("topic", selectedTopic);
+    }
+    const { data: questions } = await query;
+    if (!questions || questions.length < size) {
+      toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`);
+      return;
+    }
+    const shuffled = [...questions].sort(() => Math.random() - 0.5);
+    setPreviewQuestions(shuffled.slice(0, size));
+    setShowPreview(true);
+  };
+
+  const swapQuestion = async (index: number) => {
+    const currentIds = new Set(previewQuestions.map((q) => q.id));
+    const query = supabase.from("quiz_questions").select("id, question, topic");
+    if (quizMode === "topic" && selectedTopic !== "all") {
+      query.eq("topic", selectedTopic);
+    }
+    const { data: all } = await query;
+    if (!all) return;
+    const available = all.filter((q) => !currentIds.has(q.id));
+    if (available.length === 0) {
+      toast.error("No more questions available to swap");
+      return;
+    }
+    const replacement = available[Math.floor(Math.random() * available.length)];
+    setPreviewQuestions((prev) => prev.map((q, i) => (i === index ? replacement : q)));
+    toast.success("Question swapped!");
+  };
+
+  const publishQuiz = async () => {
+    if (previewQuestions.length === 0) return;
+    setCreating(true);
+    try {
+      const code = generateSessionCode();
+      const { error } = await supabase.from("quiz_sessions").insert({
+        session_code: code,
+        question_ids: previewQuestions.map((q) => q.id),
+      });
+      if (error) {
+        toast.error("Failed to create quiz");
+        console.error(error);
+      } else {
+        toast.success(`Quiz created with ${previewQuestions.length} questions!`);
+        setShowPreview(false);
+        setPreviewQuestions([]);
+        fetchSessions();
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const createQuizDirect = async () => {
     setCreating(true);
     try {
       const size = parseInt(quizSize);
