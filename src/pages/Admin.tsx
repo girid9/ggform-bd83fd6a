@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateSessionCode } from "@/lib/shuffle";
 import { toast } from "sonner";
-import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar } from "lucide-react";
+import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
+import Leaderboard from "@/components/Leaderboard";
 
 const ADMIN_PASSCODE = "ictsm2025";
 
@@ -36,6 +38,7 @@ const Admin = () => {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<QuizAttempt | null>(null);
   const [creating, setCreating] = useState(false);
+  const [quizSize, setQuizSize] = useState("20");
 
   useEffect(() => {
     if (authenticated) fetchSessions();
@@ -65,13 +68,14 @@ const Admin = () => {
   const createQuiz = async () => {
     setCreating(true);
     try {
+      const size = parseInt(quizSize);
       const { data: questions } = await supabase.from("quiz_questions").select("id");
-      if (!questions || questions.length < 20) {
-        toast.error("Not enough questions in the database");
+      if (!questions || questions.length < size) {
+        toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`);
         return;
       }
       const shuffled = [...questions].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, 20).map((q) => q.id);
+      const selected = shuffled.slice(0, size).map((q) => q.id);
       const code = generateSessionCode();
       const { error } = await supabase.from("quiz_sessions").insert({
         session_code: code,
@@ -81,7 +85,7 @@ const Admin = () => {
         toast.error("Failed to create quiz");
         console.error(error);
       } else {
-        toast.success("Quiz created!");
+        toast.success(`Quiz created with ${size} questions!`);
         fetchSessions();
       }
     } finally {
@@ -95,6 +99,30 @@ const Admin = () => {
     toast.success("Link copied to clipboard!");
   };
 
+  const exportToCSV = () => {
+    if (attempts.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+    const headers = ["Student Name", "Score", "Total Questions", "Percentage", "Date"];
+    const rows = attempts.map((a) => [
+      a.student_name,
+      a.score,
+      a.total_questions,
+      `${Math.round((a.score / a.total_questions) * 100)}%`,
+      new Date(a.created_at).toLocaleString(),
+    ]);
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `quiz-results-${selectedSession?.session_code || "all"}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Results exported!");
+  };
+
   const handlePasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (passcode === ADMIN_PASSCODE) {
@@ -104,7 +132,6 @@ const Admin = () => {
     }
   };
 
-  // --- PASSCODE ---
   if (!authenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden">
@@ -119,16 +146,8 @@ const Admin = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasscode} className="space-y-4">
-              <Input
-                type="password"
-                placeholder="Enter passcode"
-                value={passcode}
-                onChange={(e) => setPasscode(e.target.value)}
-                className="h-11"
-              />
-              <Button type="submit" className="w-full h-11 font-semibold">
-                Unlock
-              </Button>
+              <Input type="password" placeholder="Enter passcode" value={passcode} onChange={(e) => setPasscode(e.target.value)} className="h-11" />
+              <Button type="submit" className="w-full h-11 font-semibold">Unlock</Button>
             </form>
           </CardContent>
         </Card>
@@ -136,7 +155,6 @@ const Admin = () => {
     );
   }
 
-  // --- STUDENT DETAIL ---
   if (selectedStudent && selectedSession) {
     return (
       <StudentDetail
@@ -147,11 +165,10 @@ const Admin = () => {
     );
   }
 
-  // --- SESSION DETAIL (attempts list) ---
   if (selectedSession) {
     return (
       <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
-        <Button variant="ghost" size="sm" onClick={() => setSelectedSession(null)} className="mb-4 gap-1.5 text-muted-foreground hover:text-foreground -ml-2">
+        <Button variant="ghost" size="sm" onClick={() => { setSelectedSession(null); setAttempts([]); }} className="mb-4 gap-1.5 text-muted-foreground hover:text-foreground -ml-2">
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
 
@@ -160,12 +177,22 @@ const Admin = () => {
             <h2 className="text-lg font-bold">{selectedSession.session_code}</h2>
             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
               <Calendar className="w-3 h-3" />
-              {new Date(selectedSession.created_at).toLocaleDateString()}
+              {new Date(selectedSession.created_at).toLocaleDateString()} · {selectedSession.question_ids.length} Qs
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1.5 text-xs shrink-0">
-            <Copy className="w-3 h-3" /> Copy Link
-          </Button>
+          <div className="flex gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-1.5 text-xs h-8">
+              <Download className="w-3 h-3" /> Export
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1.5 text-xs h-8">
+              <Copy className="w-3 h-3" /> Link
+            </Button>
+          </div>
+        </div>
+
+        {/* Leaderboard */}
+        <div className="mb-4">
+          <Leaderboard sessionId={selectedSession.id} />
         </div>
 
         {attempts.length === 0 ? (
@@ -218,21 +245,42 @@ const Admin = () => {
     );
   }
 
-  // --- SESSIONS LIST ---
   return (
     <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
       <div className="flex items-start justify-between gap-3 mb-6">
         <div>
-          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            ← Home
-          </Link>
+          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Home</Link>
           <h1 className="text-xl font-bold mt-1">Tutor Dashboard</h1>
         </div>
-        <Button onClick={createQuiz} disabled={creating} size="sm" className="gap-1.5 font-semibold shrink-0">
-          {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-          New Quiz
-        </Button>
+        <Link to="/analytics">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0">
+            <BarChart3 className="w-3.5 h-3.5" /> Analytics
+          </Button>
+        </Link>
       </div>
+
+      {/* Create Quiz */}
+      <Card className="glass-card mb-5">
+        <CardContent className="py-4 px-4">
+          <p className="text-sm font-semibold mb-3">Create New Quiz</p>
+          <div className="flex items-center gap-3">
+            <Select value={quizSize} onValueChange={setQuizSize}>
+              <SelectTrigger className="w-28 h-9 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[10, 15, 20, 25, 30, 40, 50].map((n) => (
+                  <SelectItem key={n} value={String(n)}>{n} questions</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={createQuiz} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1">
+              {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
+              Create Quiz
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {sessions.length === 0 ? (
         <Card className="glass-card">
@@ -262,10 +310,7 @@ const Admin = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyLink(s.session_code);
-                  }}
+                  onClick={(e) => { e.stopPropagation(); copyLink(s.session_code); }}
                   className="gap-1.5 text-xs h-8"
                 >
                   <Copy className="w-3 h-3" /> Copy
