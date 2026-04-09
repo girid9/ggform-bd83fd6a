@@ -122,8 +122,36 @@ const Admin = () => {
     URL.revokeObjectURL(url);
     toast.success("Results exported!");
   };
+  const regenerateQuiz = async () => {
+    if (!selectedSession) return;
+    setCreating(true);
+    try {
+      const size = selectedSession.question_ids.length;
+      const { data: questions } = await supabase.from("quiz_questions").select("id");
+      if (!questions || questions.length < size) {
+        toast.error("Not enough questions");
+        return;
+      }
+      const shuffled = [...questions].sort(() => Math.random() - 0.5);
+      const newIds = shuffled.slice(0, size).map((q) => q.id);
+      const { error } = await supabase
+        .from("quiz_sessions")
+        .update({ question_ids: newIds })
+        .eq("id", selectedSession.id);
+      if (error) {
+        toast.error("Failed to regenerate quiz");
+        console.error(error);
+      } else {
+        setSelectedSession({ ...selectedSession, question_ids: newIds });
+        toast.success("Quiz regenerated with new questions! Same link works.");
+        fetchSessions();
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
 
-  const handlePasscode = (e: React.FormEvent) => {
+
     e.preventDefault();
     if (passcode === ADMIN_PASSCODE) {
       setAuthenticated(true);
