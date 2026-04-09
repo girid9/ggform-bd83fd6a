@@ -11,6 +11,9 @@ import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, 
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
+import { FloatingInput } from "@/components/FloatingInput";
+import { EmptyState } from "@/components/EmptyState";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 const ADMIN_PASSCODE = "ictsm2025";
 
