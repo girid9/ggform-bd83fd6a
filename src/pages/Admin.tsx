@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateSessionCode } from "@/lib/shuffle";
 import { toast } from "sonner";
-import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw } from "lucide-react";
+import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw, BookOpen, Filter } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
@@ -42,14 +42,31 @@ const Admin = () => {
   const [selectedStudent, setSelectedStudent] = useState<QuizAttempt | null>(null);
   const [creating, setCreating] = useState(false);
   const [quizSize, setQuizSize] = useState("20");
+  const [quizMode, setQuizMode] = useState<"random" | "topic">("random");
+  const [topics, setTopics] = useState<{ topic: string; count: number }[]>([]);
+  const [selectedTopic, setSelectedTopic] = useState("all");
+  const [previewQuestions, setPreviewQuestions] = useState<{ id: string; question: string; topic: string }[]>([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
-    if (authenticated) fetchSessions();
+    if (authenticated) {
+      fetchSessions();
+      fetchTopics();
+    }
   }, [authenticated]);
 
   useEffect(() => {
     if (selectedSession) fetchAttempts(selectedSession.id);
   }, [selectedSession]);
+
+  const fetchTopics = async () => {
+    const { data } = await supabase.from("quiz_questions").select("topic");
+    if (data) {
+      const map = new Map<string, number>();
+      data.forEach((q) => map.set(q.topic, (map.get(q.topic) || 0) + 1));
+      setTopics(Array.from(map.entries()).map(([topic, count]) => ({ topic, count })).sort((a, b) => a.topic.localeCompare(b.topic)));
+    }
+  };
 
   const fetchSessions = async () => {
     const { data } = await supabase
@@ -68,7 +85,64 @@ const Admin = () => {
     if (data) setAttempts(data as QuizAttempt[]);
   };
 
-  const createQuiz = async () => {
+  const generatePreview = async () => {
+    const size = parseInt(quizSize);
+    const query = supabase.from("quiz_questions").select("id, question, topic");
+    if (quizMode === "topic" && selectedTopic !== "all") {
+      query.eq("topic", selectedTopic);
+    }
+    const { data: questions } = await query;
+    if (!questions || questions.length < size) {
+      toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`);
+      return;
+    }
+    const shuffled = [...questions].sort(() => Math.random() - 0.5);
+    setPreviewQuestions(shuffled.slice(0, size));
+    setShowPreview(true);
+  };
+
+  const swapQuestion = async (index: number) => {
+    const currentIds = new Set(previewQuestions.map((q) => q.id));
+    const query = supabase.from("quiz_questions").select("id, question, topic");
+    if (quizMode === "topic" && selectedTopic !== "all") {
+      query.eq("topic", selectedTopic);
+    }
+    const { data: all } = await query;
+    if (!all) return;
+    const available = all.filter((q) => !currentIds.has(q.id));
+    if (available.length === 0) {
+      toast.error("No more questions available to swap");
+      return;
+    }
+    const replacement = available[Math.floor(Math.random() * available.length)];
+    setPreviewQuestions((prev) => prev.map((q, i) => (i === index ? replacement : q)));
+    toast.success("Question swapped!");
+  };
+
+  const publishQuiz = async () => {
+    if (previewQuestions.length === 0) return;
+    setCreating(true);
+    try {
+      const code = generateSessionCode();
+      const { error } = await supabase.from("quiz_sessions").insert({
+        session_code: code,
+        question_ids: previewQuestions.map((q) => q.id),
+      });
+      if (error) {
+        toast.error("Failed to create quiz");
+        console.error(error);
+      } else {
+        toast.success(`Quiz created with ${previewQuestions.length} questions!`);
+        setShowPreview(false);
+        setPreviewQuestions([]);
+        fetchSessions();
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const createQuizDirect = async () => {
     setCreating(true);
     try {
       const size = parseInt(quizSize);
@@ -299,8 +373,31 @@ const Admin = () => {
       {/* Create Quiz */}
       <Card className="glass-card mb-5">
         <CardContent className="py-4 px-4">
-          <p className="text-sm font-semibold mb-3">Create New Quiz</p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold">Create New Quiz</p>
+            <div className="flex gap-1">
+              <Button variant={quizMode === "random" ? "default" : "ghost"} size="sm" className="text-[10px] h-6 px-2" onClick={() => setQuizMode("random")}>Random</Button>
+              <Button variant={quizMode === "topic" ? "default" : "ghost"} size="sm" className="text-[10px] h-6 px-2" onClick={() => setQuizMode("topic")}>
+                <Filter className="w-3 h-3 mr-1" /> By Topic
+              </Button>
+            </div>
+          </div>
+
+          {quizMode === "topic" && (
+            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+              <SelectTrigger className="w-full h-9 text-xs mb-2">
+                <SelectValue placeholder="Select topic" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All topics</SelectItem>
+                {topics.map((t) => (
+                  <SelectItem key={t.topic} value={t.topic}>{t.topic} ({t.count})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <div className="flex items-center gap-2">
             <Select value={quizSize} onValueChange={setQuizSize}>
               <SelectTrigger className="w-28 h-9 text-xs">
                 <SelectValue />
@@ -311,18 +408,61 @@ const Admin = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={createQuiz} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1">
-              {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-              Create Quiz
+            <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1">
+              {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
+              Preview & Create
+            </Button>
+            <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-9">
+              <Plus className="w-3.5 h-3.5" /> Quick
             </Button>
           </div>
         </CardContent>
       </Card>
 
+      {/* Preview Modal */}
+      {showPreview && previewQuestions.length > 0 && (
+        <Card className="glass-card mb-5 border-primary/30">
+          <CardContent className="py-4 px-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold">Preview ({previewQuestions.length} questions)</p>
+              <div className="flex gap-2">
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => setShowPreview(false)}>Cancel</Button>
+                <Button size="sm" className="text-xs h-7 font-semibold" onClick={publishQuiz} disabled={creating}>
+                  {creating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                  Publish Quiz
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-1.5 max-h-60 overflow-y-auto">
+              {previewQuestions.map((q, idx) => (
+                <div key={q.id} className="flex items-start justify-between gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium truncate"><span className="text-muted-foreground mr-1">{idx + 1}.</span>{q.question}</p>
+                    <p className="text-[9px] text-muted-foreground/70">{q.topic}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-[10px] h-6 px-2 shrink-0" onClick={() => swapQuestion(idx)}>
+                    <RefreshCw className="w-3 h-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Question Bank link */}
+      <div className="mb-4">
+        <Link to="/questions">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full">
+            <BookOpen className="w-3.5 h-3.5" /> Browse Question Bank
+          </Button>
+        </Link>
+      </div>
+
       {sessions.length === 0 ? (
         <Card className="glass-card">
           <CardContent className="py-0">
-            <EmptyState icon="quiz" title="No quizzes yet" description="Create your first quiz to get started" actionLabel="Create Quiz" onAction={createQuiz} />
+            <EmptyState icon="quiz" title="No quizzes yet" description="Create your first quiz to get started" actionLabel="Create Quiz" onAction={createQuizDirect} />
           </CardContent>
         </Card>
       ) : (
