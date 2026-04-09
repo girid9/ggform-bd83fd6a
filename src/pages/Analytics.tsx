@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, TrendingUp, AlertTriangle, Trophy, BarChart3, Download } from "lucide-react";
+import { ArrowLeft, Users, TrendingUp, AlertTriangle, Trophy, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 interface AttemptRow {
   id: string;
@@ -44,7 +44,7 @@ const Analytics = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center nature-gradient">
         <p className="text-sm text-muted-foreground">Loading analytics…</p>
       </div>
     );
@@ -59,7 +59,6 @@ const Analytics = () => {
     ? Math.round((attempts.filter((a) => (a.score / a.total_questions) * 100 >= 60).length / totalAttempts) * 100)
     : 0;
 
-  // Question-level analytics
   const questionStats: Record<string, { total: number; correct: number }> = {};
   attempts.forEach((a) => {
     const answers = a.answers as Record<string, string>;
@@ -81,7 +80,6 @@ const Analytics = () => {
     .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 15);
 
-  // Topic-level breakdown
   const topicStats: Record<string, { total: number; correct: number }> = {};
   attempts.forEach((a) => {
     const answers = a.answers as Record<string, string>;
@@ -102,7 +100,6 @@ const Analytics = () => {
     }))
     .sort((a, b) => a.accuracy - b.accuracy);
 
-  // Daily breakdown
   const dailyStats: Record<string, { attempts: number; totalPct: number }> = {};
   attempts.forEach((a) => {
     const day = new Date(a.created_at).toLocaleDateString();
@@ -119,33 +116,37 @@ const Analytics = () => {
     }))
     .slice(0, 14);
 
+  const statCards = [
+    { icon: Users, label: "Students", value: totalStudents, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" },
+    { icon: BarChart3, label: "Attempts", value: totalAttempts, color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300" },
+    { icon: TrendingUp, label: "Avg Score", value: `${avgScore}%`, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" },
+    { icon: Trophy, label: "Pass Rate", value: `${passRate}%`, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
+  ];
+
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto nature-gradient">
+      <div className="fixed top-4 right-4 z-20"><DarkModeToggle /></div>
+      
+      <div className="flex items-center gap-3 mb-6 animate-fade-up">
         <Link to="/admin">
-          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2">
+          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 rounded-xl">
             <ArrowLeft className="w-4 h-4" /> Admin
           </Button>
         </Link>
-        <h1 className="text-xl font-bold">Analytics</h1>
+        <h1 className="text-xl font-bold font-display">Analytics</h1>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 mb-6">
-        {[
-          { icon: Users, label: "Students", value: totalStudents, color: "text-primary" },
-          { icon: BarChart3, label: "Attempts", value: totalAttempts, color: "text-accent" },
-          { icon: TrendingUp, label: "Avg Score", value: `${avgScore}%`, color: "text-success" },
-          { icon: Trophy, label: "Pass Rate", value: `${passRate}%`, color: "text-warning" },
-        ].map(({ icon: Icon, label, value, color }) => (
-          <Card key={label} className="glass-card">
+        {statCards.map(({ icon: Icon, label, value, color }, i) => (
+          <Card key={label} className="glass-card rounded-2xl animate-fade-up" style={{ animationDelay: `${i * 75}ms`, animationFillMode: "both" }}>
             <CardContent className="py-4 px-4 flex items-center gap-3">
-              <div className={`${color} bg-secondary rounded-lg p-2`}>
+              <div className={`${color} rounded-xl p-2.5`}>
                 <Icon className="w-4 h-4" />
               </div>
               <div>
                 <p className="text-[11px] text-muted-foreground">{label}</p>
-                <p className="text-lg font-bold">{value}</p>
+                <p className="text-lg font-bold font-display">{value}</p>
               </div>
             </CardContent>
           </Card>
@@ -154,9 +155,9 @@ const Analytics = () => {
 
       {/* Daily Breakdown */}
       {dailyBreakdown.length > 0 && (
-        <Card className="glass-card mb-6">
+        <Card className="glass-card mb-6 rounded-2xl">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
+            <CardTitle className="text-sm flex items-center gap-2 font-display">
               <TrendingUp className="w-4 h-4 text-primary" /> Daily Breakdown
             </CardTitle>
           </CardHeader>
@@ -165,10 +166,8 @@ const Analytics = () => {
               {dailyBreakdown.map((d) => (
                 <div key={d.date} className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground w-24">{d.date}</span>
-                  <div className="flex-1 mx-3">
-                    <Progress value={d.avgScore} className="h-2" />
-                  </div>
-                  <span className="font-semibold w-20 text-right">{d.avgScore}% · {d.attempts} att</span>
+                  <div className="flex-1 mx-3"><Progress value={d.avgScore} className="h-2" /></div>
+                  <span className="font-semibold w-20 text-right">{d.avgScore}% · {d.attempts}</span>
                 </div>
               ))}
             </div>
@@ -176,12 +175,12 @@ const Analytics = () => {
         </Card>
       )}
 
-      {/* Topic Breakdown */}
+      {/* Topic Performance */}
       {topicBreakdown.length > 0 && (
-        <Card className="glass-card mb-6">
+        <Card className="glass-card mb-6 rounded-2xl">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-accent" /> Topic Performance
+            <CardTitle className="text-sm flex items-center gap-2 font-display">
+              <BarChart3 className="w-4 h-4 text-primary" /> Topic Performance
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -190,7 +189,7 @@ const Analytics = () => {
                 <div key={t.topic}>
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="text-muted-foreground truncate max-w-[60%]">{t.topic}</span>
-                    <span className={`font-semibold ${t.accuracy >= 60 ? "text-success" : "text-destructive"}`}>
+                    <span className={`font-semibold ${t.accuracy >= 60 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}>
                       {t.accuracy}%
                     </span>
                   </div>
@@ -204,26 +203,26 @@ const Analytics = () => {
 
       {/* Hardest Questions */}
       {hardestQuestions.length > 0 && (
-        <Card className="glass-card mb-6">
+        <Card className="glass-card mb-6 rounded-2xl">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-destructive" /> Most Difficult Questions
+            <CardTitle className="text-sm flex items-center gap-2 font-display">
+              <AlertTriangle className="w-4 h-4 text-amber-500" /> Most Difficult Questions
             </CardTitle>
             <CardDescription className="text-xs">Sorted by lowest accuracy</CardDescription>
           </CardHeader>
-          <CardContent className="overflow-hidden">
+          <CardContent>
             <div className="space-y-2.5">
               {hardestQuestions.map((hq, i) => (
                 <div key={hq.question!.id} className="flex items-start gap-2.5 text-xs">
-                  <span className={`flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded text-[10px] font-bold ${
-                    hq.accuracy < 40 ? "bg-destructive/15 text-destructive" : "bg-warning/15 text-warning"
+                  <span className={`flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-lg text-[10px] font-bold ${
+                    hq.accuracy < 40 ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
                   }`}>
                     {i + 1}
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="leading-snug line-clamp-2">{hq.question!.question}</p>
                     <p className="text-muted-foreground/70 text-[10px] mt-0.5">
-                      {hq.question!.topic} · {hq.totalAttempts} attempts · <span className={hq.accuracy < 40 ? "text-destructive" : "text-warning"}>{hq.accuracy}% accuracy</span>
+                      {hq.question!.topic} · {hq.totalAttempts} attempts · <span className={hq.accuracy < 40 ? "text-red-500" : "text-amber-600"}>{hq.accuracy}%</span>
                     </p>
                   </div>
                 </div>
@@ -234,7 +233,7 @@ const Analytics = () => {
       )}
 
       {totalAttempts === 0 && (
-        <Card className="glass-card">
+        <Card className="glass-card rounded-2xl">
           <CardContent className="py-12 text-center">
             <BarChart3 className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">No quiz data yet. Analytics will appear after students take quizzes.</p>
