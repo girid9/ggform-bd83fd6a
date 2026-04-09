@@ -120,3 +120,13 @@
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
   }
 }
+
+@keyframes draw-circle {
+  from { stroke-dashoffset: 176; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes draw-check {
+  from { stroke-dashoffset: 40; }
+  to { stroke-dashoffset: 0; }
+}

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Shield, GraduationCap, Brain } from "lucide-react";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 const Index = () => {
   return (
