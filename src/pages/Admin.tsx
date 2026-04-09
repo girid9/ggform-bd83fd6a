@@ -49,12 +49,24 @@ const Admin = () => {
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
-    if (authenticated) fetchSessions();
+    if (authenticated) {
+      fetchSessions();
+      fetchTopics();
+    }
   }, [authenticated]);
 
   useEffect(() => {
     if (selectedSession) fetchAttempts(selectedSession.id);
   }, [selectedSession]);
+
+  const fetchTopics = async () => {
+    const { data } = await supabase.from("quiz_questions").select("topic");
+    if (data) {
+      const map = new Map<string, number>();
+      data.forEach((q) => map.set(q.topic, (map.get(q.topic) || 0) + 1));
+      setTopics(Array.from(map.entries()).map(([topic, count]) => ({ topic, count })).sort((a, b) => a.topic.localeCompare(b.topic)));
+    }
+  };
 
   const fetchSessions = async () => {
     const { data } = await supabase
