@@ -1,16 +1,30 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { BookOpen, Shield } from "lucide-react";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="text-center max-w-md space-y-6">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-2">
+          <BookOpen className="w-10 h-10 text-primary" />
+        </div>
+        <h1 className="text-3xl font-bold tracking-tight">ICTSM Quiz System</h1>
+        <p className="text-muted-foreground text-base">
+          768 MCQ questions covering ICTSM Theory & Employability Skills.
+          Study first, then test your knowledge.
+        </p>
+        <div className="pt-4">
+          <Link to="/admin">
+            <Button size="lg" className="gap-2 w-full">
+              <Shield className="w-5 h-5" />
+              Tutor Dashboard
+            </Button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
