@@ -462,7 +462,7 @@ const Admin = () => {
       {sessions.length === 0 ? (
         <Card className="glass-card">
           <CardContent className="py-0">
-            <EmptyState icon="quiz" title="No quizzes yet" description="Create your first quiz to get started" actionLabel="Create Quiz" onAction={createQuiz} />
+            <EmptyState icon="quiz" title="No quizzes yet" description="Create your first quiz to get started" actionLabel="Create Quiz" onAction={createQuizDirect} />
           </CardContent>
         </Card>
       ) : (
