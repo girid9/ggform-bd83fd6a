@@ -9,7 +9,7 @@ interface StepProgressProps {
 const StepProgress = ({ currentStep, totalSteps, labels }: StepProgressProps) => {
   return (
     <div className="w-full mb-6">
-      <p className="text-xs font-medium text-foreground-muted mb-2 text-center">
+      <p className="text-xs font-medium text-muted-foreground mb-2 text-center">
         Step {currentStep} of {totalSteps}
       </p>
       <div className="flex items-center gap-1.5">
@@ -22,11 +22,22 @@ const StepProgress = ({ currentStep, totalSteps, labels }: StepProgressProps) =>
               <div
                 className={cn(
                   "h-1.5 w-full rounded-full transition-all duration-300",
-                  isCompleted ? "bg-primary" : isCurrent ? "bg-primary/60" : "bg-muted"
+                  isCompleted
+                    ? "bg-primary"
+                    : isCurrent
+                    ? "bg-primary/60"
+                    : "bg-muted"
                 )}
               />
               {labels && labels[i] && (
-                <span className={cn("text-2xs transition-colors", isCompleted || isCurrent ? "text-primary font-medium" : "text-foreground-subtle")}>
+                <span
+                  className={cn(
+                    "text-[10px] transition-colors",
+                    isCompleted || isCurrent
+                      ? "text-primary font-medium"
+                      : "text-muted-foreground/50"
+                  )}
+                >
                   {labels[i]}
                 </span>
               )}

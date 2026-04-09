@@ -2,8 +2,11 @@ import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronDown, ChevronUp, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, Search, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 interface Question {
   id: string;
@@ -25,7 +28,10 @@ const QuestionBank = () => {
 
   useEffect(() => {
     const fetchQuestions = async () => {
-      const { data } = await supabase.from("quiz_questions").select("*").order("topic");
+      const { data } = await supabase
+        .from("quiz_questions")
+        .select("*")
+        .order("topic");
       if (data) setQuestions(data);
       setLoading(false);
     };
@@ -41,7 +47,10 @@ const QuestionBank = () => {
   const filtered = useMemo(() => {
     return questions.filter((q) => {
       const matchesTopic = topicFilter === "all" || q.topic === topicFilter;
-      const matchesSearch = !search || q.question.toLowerCase().includes(search.toLowerCase()) || q.topic.toLowerCase().includes(search.toLowerCase());
+      const matchesSearch =
+        !search ||
+        q.question.toLowerCase().includes(search.toLowerCase()) ||
+        q.topic.toLowerCase().includes(search.toLowerCase());
       return matchesTopic && matchesSearch;
     });
   }, [questions, topicFilter, search]);
@@ -58,49 +67,64 @@ const QuestionBank = () => {
   const toggleTopic = (topic: string) => {
     setExpandedTopics((prev) => {
       const next = new Set(prev);
-      if (next.has(topic)) next.delete(topic); else next.add(topic);
+      if (next.has(topic)) next.delete(topic);
+      else next.add(topic);
       return next;
     });
   };
 
   return (
-    <div>
-      {/* Header stats */}
+    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto">
+      <div className="fixed top-4 right-4 z-20">
+        <DarkModeToggle />
+      </div>
+
+      <Link to="/admin" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4">
+        <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+      </Link>
+
       <div className="mb-6">
-        <p className="text-sm text-foreground-muted">{questions.length} questions across {topics.length} topics</p>
+        <div className="flex items-center gap-2 mb-1">
+          <BookOpen className="w-5 h-5 text-primary" />
+          <h1 className="text-xl font-bold">Question Bank</h1>
+        </div>
+        <p className="text-xs text-muted-foreground">{questions.length} questions across {topics.length} topics</p>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-5">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-subtle" />
-          <Input placeholder="Search questions..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-10" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+          <Input
+            placeholder="Search questions..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-9 text-sm"
+          />
         </div>
         <Select value={topicFilter} onValueChange={setTopicFilter}>
-          <SelectTrigger className="w-44 h-10 text-xs">
+          <SelectTrigger className="w-40 h-9 text-xs">
             <SelectValue placeholder="All topics" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All topics ({questions.length})</SelectItem>
             {topics.map(([topic, count]) => (
-              <SelectItem key={topic} value={topic}>{topic} ({count})</SelectItem>
+              <SelectItem key={topic} value={topic}>
+                {topic} ({count})
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
       {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 rounded-2xl bg-muted animate-shimmer" style={{ backgroundImage: 'linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--surface-raised)) 50%, hsl(var(--muted)) 75%)', backgroundSize: '200% 100%' }} />
-          ))}
-        </div>
+        <div className="text-center py-16 text-sm text-muted-foreground">Loading questions…</div>
       ) : filtered.length === 0 ? (
-        <Card className="surface-card">
+        <Card className="glass-card">
           <CardContent className="py-16 text-center">
-            <svg className="w-16 h-16 text-foreground-subtle/30 mx-auto mb-4" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="10" y="6" width="44" height="52" rx="4" /><line x1="20" y1="18" x2="44" y2="18" /><line x1="20" y1="26" x2="38" y2="26" /><line x1="20" y1="34" x2="42" y2="34" /></svg>
-            <p className="text-sm font-semibold mb-1">No questions found</p>
-            <p className="text-xs text-foreground-muted">Try adjusting your search or filter</p>
+            <Search className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
+            <p className="text-sm font-medium">No questions found</p>
+            <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter</p>
           </CardContent>
         </Card>
       ) : (
@@ -108,27 +132,39 @@ const QuestionBank = () => {
           {groupedByTopic.map(([topic, qs]) => {
             const isExpanded = expandedTopics.has(topic);
             return (
-              <Card key={topic} className="surface-card overflow-hidden">
-                <button onClick={() => toggleTopic(topic)} className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-accent/50 transition-colors">
+              <Card key={topic} className="glass-card overflow-hidden">
+                <button
+                  onClick={() => toggleTopic(topic)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+                >
                   <div>
-                    <p className="text-sm font-semibold font-display">{topic}</p>
-                    <p className="text-2xs text-foreground-subtle">{qs.length} question{qs.length !== 1 ? "s" : ""}</p>
+                    <p className="text-sm font-semibold">{topic}</p>
+                    <p className="text-[10px] text-muted-foreground">{qs.length} question{qs.length !== 1 ? "s" : ""}</p>
                   </div>
-                  {isExpanded ? <ChevronUp className="w-4 h-4 text-foreground-subtle" /> : <ChevronDown className="w-4 h-4 text-foreground-subtle" />}
+                  {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                 </button>
                 {isExpanded && (
-                  <div className="border-t border-border divide-y divide-border/50">
+                  <div className="border-t border-border/50 divide-y divide-border/30">
                     {qs.map((q, idx) => (
                       <div key={q.id} className="px-4 py-3">
-                        <p className="text-xs font-medium mb-2"><span className="text-foreground-muted mr-1">{idx + 1}.</span>{q.question}</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        <p className="text-xs font-medium mb-2">
+                          <span className="text-muted-foreground mr-1">{idx + 1}.</span>
+                          {q.question}
+                        </p>
+                        <div className="grid grid-cols-2 gap-1.5">
                           {(["A", "B", "C", "D"] as const).map((key) => {
                             const text = q[`option_${key.toLowerCase()}` as keyof Question] as string;
                             const isCorrect = q.correct_answer === key;
                             return (
-                              <div key={key} className={`rounded-xl px-3 py-2 text-xs ${isCorrect ? "bg-success/10 text-success font-medium border border-success/20" : "bg-muted/50 text-foreground-muted"}`}>
+                              <div
+                                key={key}
+                                className={`rounded-md px-2 py-1.5 text-[11px] ${
+                                  isCorrect
+                                    ? "bg-success/10 text-success font-medium border border-success/20"
+                                    : "bg-muted/50 text-muted-foreground"
+                                }`}
+                              >
                                 <span className="font-semibold mr-1">{key}.</span>{text}
-                                {isCorrect && <CheckCircle2 className="w-3 h-3 inline ml-1 -mt-0.5" />}
                               </div>
                             );
                           })}
@@ -143,7 +179,9 @@ const QuestionBank = () => {
         </div>
       )}
 
-      <p className="text-center text-2xs text-foreground-subtle mt-6">Showing {filtered.length} of {questions.length} questions</p>
+      <p className="text-center text-[10px] text-muted-foreground/50 mt-6">
+        Showing {filtered.length} of {questions.length} questions
+      </p>
     </div>
   );
 };
