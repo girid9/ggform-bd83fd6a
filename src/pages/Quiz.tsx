@@ -3,11 +3,14 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { shuffleArray } from "@/lib/shuffle";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { BookOpen, CheckCircle2, XCircle, ArrowRight, GraduationCap, Loader2 } from "lucide-react";
+import { FloatingInput } from "@/components/FloatingInput";
+import { StepProgress } from "@/components/StepProgress";
+import { SuccessScreen } from "@/components/SuccessScreen";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 interface Question {
   id: string;
@@ -28,6 +31,8 @@ interface ShuffledOption {
   text: string;
 }
 
+const STEP_LABELS = ["Enter Name", "Study", "Quiz"];
+
 const Quiz = () => {
   const { code } = useParams<{ code: string }>();
   const [phase, setPhase] = useState<Phase>("name");
@@ -39,6 +44,8 @@ const Quiz = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [score, setScore] = useState(0);
+
+  const currentStep = phase === "name" ? 1 : phase === "study" ? 2 : 3;
 
   const shuffledQuestions = useMemo(() => {
     if (phase !== "quiz") return [];
@@ -97,7 +104,6 @@ const Quiz = () => {
       toast.error("Please enter your name");
       return;
     }
-    // Check for duplicate attempt
     const { data: existing } = await supabase
       .from("quiz_attempts")
       .select("id")
@@ -174,9 +180,12 @@ const Quiz = () => {
   // --- NAME ENTRY ---
   if (phase === "name") {
     return (
-       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50">
-         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -z-10" />
-         <Card className="w-full max-w-sm glass-card animate-fade-up">
+      <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-background dark:via-background dark:to-background">
+        <div className="absolute top-4 right-4">
+          <DarkModeToggle />
+        </div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -z-10" />
+        <Card className="w-full max-w-sm glass-card animate-fade-up">
           <CardHeader className="text-center pb-4">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 mx-auto mb-3">
               <GraduationCap className="w-8 h-8 text-primary-foreground" />
@@ -185,13 +194,13 @@ const Quiz = () => {
             <CardDescription className="text-sm">Enter your name to begin</CardDescription>
           </CardHeader>
           <CardContent>
+            <StepProgress currentStep={1} totalSteps={3} labels={STEP_LABELS} />
             <form onSubmit={handleNameSubmit} className="space-y-4">
-              <Input
-                placeholder="Your full name"
+              <FloatingInput
+                label="Your full name"
                 value={studentName}
                 onChange={(e) => setStudentName(e.target.value)}
                 autoFocus
-                className="h-11"
               />
               <Button type="submit" className="w-full h-11 font-semibold">
                 Continue
@@ -207,9 +216,12 @@ const Quiz = () => {
   if (phase === "study") {
     return (
       <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
+        <div className="absolute top-4 right-4 fixed z-20">
+          <DarkModeToggle />
+        </div>
         {/* Header */}
-        <div className="text-center mb-6">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 text-accent px-3 py-1 text-xs font-semibold mb-3">
+        <div className="text-center mb-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-3 py-1 text-xs font-semibold mb-3">
             <BookOpen className="w-3.5 h-3.5" /> Study Mode
           </span>
           <h1 className="text-xl font-bold">Review & Learn</h1>
@@ -217,6 +229,8 @@ const Quiz = () => {
             Read through all {questions.length} questions with correct answers shown
           </p>
         </div>
+
+        <StepProgress currentStep={2} totalSteps={3} labels={STEP_LABELS} />
 
         <div className="space-y-3 mb-24">
           {questions.map((q, idx) => (
@@ -276,8 +290,12 @@ const Quiz = () => {
 
     return (
       <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
+        <div className="absolute top-4 right-4 fixed z-20">
+          <DarkModeToggle />
+        </div>
         {/* Sticky header with progress */}
         <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-md pb-4 -mx-4 px-4 pt-2">
+          <StepProgress currentStep={3} totalSteps={3} labels={STEP_LABELS} />
           <div className="flex items-center justify-between mb-2">
             <h1 className="text-lg font-bold">Quiz</h1>
             <span className="text-xs font-semibold text-muted-foreground bg-secondary rounded-full px-2.5 py-1">
@@ -310,7 +328,7 @@ const Quiz = () => {
                           className={`rounded-lg border px-3 py-2.5 text-xs text-left transition-all ${
                             selected
                               ? "border-primary bg-primary/10 font-semibold text-primary"
-                              : "border-border/60 text-foreground hover:border-primary/30 hover:bg-primary/3"
+                              : "border-border/60 text-foreground hover:border-primary/30 hover:bg-primary/5"
                           }`}
                         >
                           <span className="font-semibold mr-1.5">{opt.label}.</span>
@@ -353,17 +371,35 @@ const Quiz = () => {
 
   return (
     <div className="min-h-screen px-4 py-6 max-w-xl mx-auto">
-      <Card className="mb-6 text-center glass-card overflow-hidden">
+      <div className="fixed top-4 right-4 z-20">
+        <DarkModeToggle />
+      </div>
+      
+      {/* Success header card */}
+      <Card className="mb-6 text-center glass-card overflow-hidden animate-scale-in">
         <div className={`h-1.5 w-full ${passed ? "bg-success" : "bg-destructive"}`} />
         <CardContent className="py-8">
-          <div
-            className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${
-              passed ? "bg-success/10" : "bg-destructive/10"
-            }`}
-          >
-            <span className={`text-3xl font-extrabold ${passed ? "text-success" : "text-destructive"}`}>
-              {percentage}%
-            </span>
+          {/* Animated checkmark or X */}
+          <svg className="w-16 h-16 mx-auto mb-3" viewBox="0 0 64 64" fill="none">
+            <circle
+              cx="32" cy="32" r="28"
+              stroke={passed ? "hsl(var(--success))" : "hsl(var(--destructive))"}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              style={{ strokeDasharray: 176, strokeDashoffset: 0, animation: "draw-circle 0.6s ease-out" }}
+            />
+            {passed ? (
+              <path d="M20 34 L28 42 L44 24" stroke="hsl(var(--success))" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+                style={{ strokeDasharray: 40, strokeDashoffset: 0, animation: "draw-check 0.4s ease-out 0.4s both" }} />
+            ) : (
+              <>
+                <path d="M22 22 L42 42" stroke="hsl(var(--destructive))" strokeWidth="3" strokeLinecap="round" style={{ strokeDasharray: 28, strokeDashoffset: 0, animation: "draw-check 0.3s ease-out 0.4s both" }} />
+                <path d="M42 22 L22 42" stroke="hsl(var(--destructive))" strokeWidth="3" strokeLinecap="round" style={{ strokeDasharray: 28, strokeDashoffset: 0, animation: "draw-check 0.3s ease-out 0.5s both" }} />
+              </>
+            )}
+          </svg>
+          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${passed ? "bg-success/10" : "bg-destructive/10"}`}>
+            <span className={`text-3xl font-extrabold ${passed ? "text-success" : "text-destructive"}`}>{percentage}%</span>
           </div>
           <h1 className="text-xl font-bold mb-1">
             {passed ? "Well Done! 🎉" : "Keep Studying! 📚"}
