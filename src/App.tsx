@@ -8,6 +8,7 @@ import Admin from "./pages/Admin";
 import Quiz from "./pages/Quiz";
 import Analytics from "./pages/Analytics";
 import QuestionBank from "./pages/QuestionBank";
+import ImportQuestions from "./pages/ImportQuestions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
