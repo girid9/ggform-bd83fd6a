@@ -208,7 +208,10 @@ const Admin = () => {
               {new Date(selectedSession.created_at).toLocaleDateString()} · {selectedSession.question_ids.length} Qs
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Button variant="outline" size="sm" onClick={regenerateQuiz} disabled={creating} className="gap-1.5 text-xs h-8">
+              {creating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Regenerate
+            </Button>
             <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-1.5 text-xs h-8">
               <Download className="w-3 h-3" /> Export
             </Button>
