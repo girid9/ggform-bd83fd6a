@@ -162,9 +162,9 @@ const Admin = () => {
 
   if (!authenticated) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -z-10" />
-        <Card className="w-full max-w-sm glass-card">
+       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden bg-gradient-to-br from-violet-50 via-white to-purple-50">
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl -z-10" />
+         <Card className="w-full max-w-sm glass-card animate-fade-up">
           <CardHeader className="text-center pb-4">
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/20 mx-auto mb-3">
               <Lock className="w-7 h-7 text-primary-foreground" />
