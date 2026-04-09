@@ -91,10 +91,21 @@ const Quiz = () => {
     setLoading(false);
   };
 
-  const handleNameSubmit = (e: React.FormEvent) => {
+  const handleNameSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!studentName.trim()) {
       toast.error("Please enter your name");
+      return;
+    }
+    // Check for duplicate attempt
+    const { data: existing } = await supabase
+      .from("quiz_attempts")
+      .select("id")
+      .eq("session_id", sessionId)
+      .ilike("student_name", studentName.trim())
+      .limit(1);
+    if (existing && existing.length > 0) {
+      toast.error("You have already taken this quiz!");
       return;
     }
     setPhase("study");
