@@ -14,7 +14,101 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          score: number
+          session_id: string
+          student_name: string
+          total_questions: number
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          score?: number
+          session_id: string
+          student_name: string
+          total_questions?: number
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          score?: number
+          session_id?: string
+          student_name?: string
+          total_questions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question: string
+          topic: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          question: string
+          topic: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          question?: string
+          topic?: string
+        }
+        Relationships: []
+      }
+      quiz_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          question_ids: string[]
+          session_code: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          question_ids: string[]
+          session_code: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          question_ids?: string[]
+          session_code?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
