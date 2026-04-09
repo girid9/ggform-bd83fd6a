@@ -373,8 +373,31 @@ const Admin = () => {
       {/* Create Quiz */}
       <Card className="glass-card mb-5">
         <CardContent className="py-4 px-4">
-          <p className="text-sm font-semibold mb-3">Create New Quiz</p>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold">Create New Quiz</p>
+            <div className="flex gap-1">
+              <Button variant={quizMode === "random" ? "default" : "ghost"} size="sm" className="text-[10px] h-6 px-2" onClick={() => setQuizMode("random")}>Random</Button>
+              <Button variant={quizMode === "topic" ? "default" : "ghost"} size="sm" className="text-[10px] h-6 px-2" onClick={() => setQuizMode("topic")}>
+                <Filter className="w-3 h-3 mr-1" /> By Topic
+              </Button>
+            </div>
+          </div>
+
+          {quizMode === "topic" && (
+            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
+              <SelectTrigger className="w-full h-9 text-xs mb-2">
+                <SelectValue placeholder="Select topic" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All topics</SelectItem>
+                {topics.map((t) => (
+                  <SelectItem key={t.topic} value={t.topic}>{t.topic} ({t.count})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <div className="flex items-center gap-2">
             <Select value={quizSize} onValueChange={setQuizSize}>
               <SelectTrigger className="w-28 h-9 text-xs">
                 <SelectValue />
@@ -385,13 +408,56 @@ const Admin = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={createQuiz} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1">
-              {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
-              Create Quiz
+            <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1">
+              {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
+              Preview & Create
+            </Button>
+            <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-9">
+              <Plus className="w-3.5 h-3.5" /> Quick
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Preview Modal */}
+      {showPreview && previewQuestions.length > 0 && (
+        <Card className="glass-card mb-5 border-primary/30">
+          <CardContent className="py-4 px-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-semibold">Preview ({previewQuestions.length} questions)</p>
+              <div className="flex gap-2">
+                <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => setShowPreview(false)}>Cancel</Button>
+                <Button size="sm" className="text-xs h-7 font-semibold" onClick={publishQuiz} disabled={creating}>
+                  {creating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
+                  Publish Quiz
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-1.5 max-h-60 overflow-y-auto">
+              {previewQuestions.map((q, idx) => (
+                <div key={q.id} className="flex items-start justify-between gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[11px] font-medium truncate"><span className="text-muted-foreground mr-1">{idx + 1}.</span>{q.question}</p>
+                    <p className="text-[9px] text-muted-foreground/70">{q.topic}</p>
+                  </div>
+                  <Button variant="ghost" size="sm" className="text-[10px] h-6 px-2 shrink-0" onClick={() => swapQuestion(idx)}>
+                    <RefreshCw className="w-3 h-3" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Question Bank link */}
+      <div className="mb-4">
+        <Link to="/questions">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full">
+            <BookOpen className="w-3.5 h-3.5" /> Browse Question Bank
+          </Button>
+        </Link>
+      </div>
 
       {sessions.length === 0 ? (
         <Card className="glass-card">
