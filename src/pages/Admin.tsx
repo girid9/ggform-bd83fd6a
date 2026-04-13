@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateSessionCode } from "@/lib/shuffle";
 import { toast } from "sonner";
-import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw, BookOpen, Filter, Upload, Leaf } from "lucide-react";
+import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw, BookOpen, Filter, Upload, Leaf, ListOrdered, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
@@ -42,7 +42,7 @@ const Admin = () => {
   const [selectedStudent, setSelectedStudent] = useState<QuizAttempt | null>(null);
   const [creating, setCreating] = useState(false);
   const [quizSize, setQuizSize] = useState("20");
-  const [quizMode, setQuizMode] = useState<"random" | "topic">("random");
+  const [quizMode, setQuizMode] = useState<"random" | "topic" | "sequential">("random");
   const [topics, setTopics] = useState<{ topic: string; count: number }[]>([]);
   const [selectedTopic, setSelectedTopic] = useState("all");
   const [previewQuestions, setPreviewQuestions] = useState<{ id: string; question: string; topic: string }[]>([]);
@@ -91,13 +91,20 @@ const Admin = () => {
     if (quizMode === "topic" && selectedTopic !== "all") {
       query.eq("topic", selectedTopic);
     }
+    if (quizMode === "sequential") {
+      query.order("created_at", { ascending: true }).limit(size);
+    }
     const { data: questions } = await query;
     if (!questions || questions.length < size) {
       toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`);
       return;
     }
-    const shuffled = [...questions].sort(() => Math.random() - 0.5);
-    setPreviewQuestions(shuffled.slice(0, size));
+    if (quizMode === "sequential") {
+      setPreviewQuestions(questions.slice(0, size));
+    } else {
+      const shuffled = [...questions].sort(() => Math.random() - 0.5);
+      setPreviewQuestions(shuffled.slice(0, size));
+    }
     setShowPreview(true);
   };
 
@@ -229,6 +236,23 @@ const Admin = () => {
     }
   };
 
+  const clearResults = async () => {
+    if (!selectedSession) return;
+    const confirmed = window.confirm("Are you sure you want to clear all student results for this quiz? This cannot be undone.");
+    if (!confirmed) return;
+    const { error } = await supabase
+      .from("quiz_attempts")
+      .delete()
+      .eq("session_id", selectedSession.id);
+    if (error) {
+      toast.error("Failed to clear results");
+      console.error(error);
+    } else {
+      setAttempts([]);
+      toast.success("All results cleared!");
+    }
+  };
+
   const handlePasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (passcode === ADMIN_PASSCODE) {
@@ -298,6 +322,9 @@ const Admin = () => {
             </Button>
             <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1.5 text-xs h-8 rounded-xl">
               <Copy className="w-3 h-3" /> Link
+            </Button>
+            <Button variant="outline" size="sm" onClick={clearResults} className="gap-1.5 text-xs h-8 rounded-xl text-destructive hover:text-destructive">
+              <Trash2 className="w-3 h-3" /> Clear
             </Button>
           </div>
         </div>
@@ -377,8 +404,11 @@ const Admin = () => {
         <CardContent className="py-4 px-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-semibold font-display">Create New Quiz</p>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap">
               <Button variant={quizMode === "random" ? "default" : "ghost"} size="sm" className={`text-[10px] h-6 px-2 rounded-lg ${quizMode === "random" ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white" : ""}`} onClick={() => setQuizMode("random")}>Random</Button>
+              <Button variant={quizMode === "sequential" ? "default" : "ghost"} size="sm" className={`text-[10px] h-6 px-2 rounded-lg ${quizMode === "sequential" ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white" : ""}`} onClick={() => setQuizMode("sequential")}>
+                <ListOrdered className="w-3 h-3 mr-1" /> First N
+              </Button>
               <Button variant={quizMode === "topic" ? "default" : "ghost"} size="sm" className={`text-[10px] h-6 px-2 rounded-lg ${quizMode === "topic" ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white" : ""}`} onClick={() => setQuizMode("topic")}>
                 <Filter className="w-3 h-3 mr-1" /> By Topic
               </Button>
