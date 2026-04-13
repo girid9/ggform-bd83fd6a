@@ -176,6 +176,20 @@ const Admin = () => {
     toast.success("Link copied to clipboard!");
   };
 
+  const deleteSession = async (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Delete this quiz and all its responses?")) return;
+    // Delete attempts first, then session
+    await supabase.from("quiz_attempts").delete().eq("session_id", sessionId);
+    const { error } = await supabase.from("quiz_sessions").delete().eq("id", sessionId);
+    if (error) {
+      toast.error("Failed to delete quiz");
+    } else {
+      toast.success("Quiz deleted!");
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    }
+  };
+
   const exportToCSV = () => {
     if (attempts.length === 0) {
       toast.error("No data to export");
