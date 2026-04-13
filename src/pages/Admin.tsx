@@ -503,14 +503,24 @@ const Admin = () => {
                     {new Date(s.created_at).toLocaleDateString()} · {s.question_ids.length} Qs
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); copyLink(s.session_code); }}
-                  className="gap-1.5 text-xs h-8 rounded-xl"
-                >
-                  <Copy className="w-3 h-3" /> Copy
-                </Button>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => { e.stopPropagation(); copyLink(s.session_code); }}
+                    className="gap-1.5 text-xs h-8 rounded-xl"
+                  >
+                    <Copy className="w-3 h-3" /> Copy
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => deleteSession(s.id, e)}
+                    className="h-8 w-8 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
