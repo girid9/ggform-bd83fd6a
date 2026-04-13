@@ -42,7 +42,7 @@ const Admin = () => {
   const [selectedStudent, setSelectedStudent] = useState<QuizAttempt | null>(null);
   const [creating, setCreating] = useState(false);
   const [quizSize, setQuizSize] = useState("20");
-  const [quizMode, setQuizMode] = useState<"random" | "topic">("random");
+  const [quizMode, setQuizMode] = useState<"random" | "topic" | "sequential">("random");
   const [topics, setTopics] = useState<{ topic: string; count: number }[]>([]);
   const [selectedTopic, setSelectedTopic] = useState("all");
   const [previewQuestions, setPreviewQuestions] = useState<{ id: string; question: string; topic: string }[]>([]);
