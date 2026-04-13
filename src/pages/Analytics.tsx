@@ -7,22 +7,8 @@ import { ArrowLeft, Users, TrendingUp, AlertTriangle, Trophy, BarChart3 } from "
 import { Link } from "react-router-dom";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 
-interface AttemptRow {
-  id: string;
-  student_name: string;
-  score: number;
-  total_questions: number;
-  created_at: string;
-  session_id: string;
-  answers: Record<string, string>;
-}
-
-interface QuestionRow {
-  id: string;
-  question: string;
-  correct_answer: string;
-  topic: string;
-}
+interface AttemptRow { id: string; student_name: string; score: number; total_questions: number; created_at: string; session_id: string; answers: Record<string, string>; }
+interface QuestionRow { id: string; question: string; correct_answer: string; topic: string; }
 
 const Analytics = () => {
   const [attempts, setAttempts] = useState<AttemptRow[]>([]);
@@ -44,7 +30,7 @@ const Analytics = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center nature-gradient">
+      <div className="flex min-h-screen items-center justify-center page-bg">
         <p className="text-sm text-muted-foreground">Loading analytics…</p>
       </div>
     );
@@ -52,12 +38,8 @@ const Analytics = () => {
 
   const totalStudents = new Set(attempts.map((a) => a.student_name.toLowerCase())).size;
   const totalAttempts = attempts.length;
-  const avgScore = totalAttempts > 0
-    ? Math.round(attempts.reduce((s, a) => s + (a.score / a.total_questions) * 100, 0) / totalAttempts)
-    : 0;
-  const passRate = totalAttempts > 0
-    ? Math.round((attempts.filter((a) => (a.score / a.total_questions) * 100 >= 60).length / totalAttempts) * 100)
-    : 0;
+  const avgScore = totalAttempts > 0 ? Math.round(attempts.reduce((s, a) => s + (a.score / a.total_questions) * 100, 0) / totalAttempts) : 0;
+  const passRate = totalAttempts > 0 ? Math.round((attempts.filter((a) => (a.score / a.total_questions) * 100 >= 60).length / totalAttempts) * 100) : 0;
 
   const questionStats: Record<string, { total: number; correct: number }> = {};
   attempts.forEach((a) => {
@@ -71,11 +53,7 @@ const Analytics = () => {
   });
 
   const hardestQuestions = Object.entries(questionStats)
-    .map(([qId, stats]) => ({
-      question: questions.find((q) => q.id === qId),
-      accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
-      totalAttempts: stats.total,
-    }))
+    .map(([qId, stats]) => ({ question: questions.find((q) => q.id === qId), accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0, totalAttempts: stats.total }))
     .filter((x) => x.question && x.totalAttempts >= 2)
     .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 15);
@@ -93,11 +71,7 @@ const Analytics = () => {
   });
 
   const topicBreakdown = Object.entries(topicStats)
-    .map(([topic, stats]) => ({
-      topic,
-      accuracy: Math.round((stats.correct / stats.total) * 100),
-      total: stats.total,
-    }))
+    .map(([topic, stats]) => ({ topic, accuracy: Math.round((stats.correct / stats.total) * 100), total: stats.total }))
     .sort((a, b) => a.accuracy - b.accuracy);
 
   const dailyStats: Record<string, { attempts: number; totalPct: number }> = {};
@@ -107,62 +81,51 @@ const Analytics = () => {
     dailyStats[day].attempts++;
     dailyStats[day].totalPct += (a.score / a.total_questions) * 100;
   });
-
-  const dailyBreakdown = Object.entries(dailyStats)
-    .map(([date, stats]) => ({
-      date,
-      attempts: stats.attempts,
-      avgScore: Math.round(stats.totalPct / stats.attempts),
-    }))
-    .slice(0, 14);
+  const dailyBreakdown = Object.entries(dailyStats).map(([date, stats]) => ({ date, attempts: stats.attempts, avgScore: Math.round(stats.totalPct / stats.attempts) })).slice(0, 14);
 
   const statCards = [
-    { icon: Users, label: "Students", value: totalStudents, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" },
-    { icon: BarChart3, label: "Attempts", value: totalAttempts, color: "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300" },
-    { icon: TrendingUp, label: "Avg Score", value: `${avgScore}%`, color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300" },
-    { icon: Trophy, label: "Pass Rate", value: `${passRate}%`, color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" },
+    { icon: Users, label: "Students", value: totalStudents, color: "bg-primary/10 text-primary" },
+    { icon: BarChart3, label: "Attempts", value: totalAttempts, color: "bg-accent text-foreground" },
+    { icon: TrendingUp, label: "Avg Score", value: `${avgScore}%`, color: "bg-primary/10 text-primary" },
+    { icon: Trophy, label: "Pass Rate", value: `${passRate}%`, color: "bg-warning/10 text-warning" },
   ];
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto nature-gradient">
-      <div className="fixed top-4 right-4 z-20"><DarkModeToggle /></div>
-      
+    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto page-bg">
+      <div className="fixed top-5 right-5 z-20"><DarkModeToggle /></div>
+
       <div className="flex items-center gap-3 mb-6 animate-fade-up">
         <Link to="/admin">
-          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 rounded-xl">
+          <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground -ml-2 rounded-full">
             <ArrowLeft className="w-4 h-4" /> Admin
           </Button>
         </Link>
         <h1 className="text-xl font-bold font-display">Analytics</h1>
       </div>
 
-      {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         {statCards.map(({ icon: Icon, label, value, color }, i) => (
-          <Card key={label} className="glass-card rounded-2xl animate-fade-up" style={{ animationDelay: `${i * 75}ms`, animationFillMode: "both" }}>
-            <CardContent className="py-4 px-4 flex items-center gap-3">
-              <div className={`${color} rounded-xl p-2.5`}>
-                <Icon className="w-4 h-4" />
-              </div>
+          <Card key={label} className="rounded-2xl animate-fade-up border-0 shadow-sm" style={{ animationDelay: `${i * 75}ms`, animationFillMode: "both" }}>
+            <CardContent className="py-5 px-5 flex items-center gap-3">
+              <div className={`${color} rounded-2xl p-3`}><Icon className="w-5 h-5" /></div>
               <div>
                 <p className="text-[11px] text-muted-foreground">{label}</p>
-                <p className="text-lg font-bold font-display">{value}</p>
+                <p className="text-xl font-bold font-display">{value}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Daily Breakdown */}
       {dailyBreakdown.length > 0 && (
-        <Card className="glass-card mb-6 rounded-2xl">
+        <Card className="mb-6 rounded-2xl border-0 shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2 font-display">
               <TrendingUp className="w-4 h-4 text-primary" /> Daily Breakdown
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {dailyBreakdown.map((d) => (
                 <div key={d.date} className="flex items-center justify-between text-xs">
                   <span className="text-muted-foreground w-24">{d.date}</span>
@@ -175,23 +138,20 @@ const Analytics = () => {
         </Card>
       )}
 
-      {/* Topic Performance */}
       {topicBreakdown.length > 0 && (
-        <Card className="glass-card mb-6 rounded-2xl">
+        <Card className="mb-6 rounded-2xl border-0 shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2 font-display">
               <BarChart3 className="w-4 h-4 text-primary" /> Topic Performance
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {topicBreakdown.map((t) => (
                 <div key={t.topic}>
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className="text-muted-foreground truncate max-w-[60%]">{t.topic}</span>
-                    <span className={`font-semibold ${t.accuracy >= 60 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}>
-                      {t.accuracy}%
-                    </span>
+                    <span className={`font-semibold ${t.accuracy >= 60 ? "text-primary" : "text-destructive"}`}>{t.accuracy}%</span>
                   </div>
                   <Progress value={t.accuracy} className="h-1.5" />
                 </div>
@@ -201,29 +161,22 @@ const Analytics = () => {
         </Card>
       )}
 
-      {/* Hardest Questions */}
       {hardestQuestions.length > 0 && (
-        <Card className="glass-card mb-6 rounded-2xl">
+        <Card className="mb-6 rounded-2xl border-0 shadow-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm flex items-center gap-2 font-display">
-              <AlertTriangle className="w-4 h-4 text-amber-500" /> Most Difficult Questions
+              <AlertTriangle className="w-4 h-4 text-warning" /> Most Difficult Questions
             </CardTitle>
             <CardDescription className="text-xs">Sorted by lowest accuracy</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {hardestQuestions.map((hq, i) => (
-                <div key={hq.question!.id} className="flex items-start gap-2.5 text-xs">
-                  <span className={`flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-lg text-[10px] font-bold ${
-                    hq.accuracy < 40 ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-300" : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-                  }`}>
-                    {i + 1}
-                  </span>
+                <div key={hq.question!.id} className="flex items-start gap-3 text-xs">
+                  <span className={`flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-xl text-[10px] font-bold ${hq.accuracy < 40 ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>{i + 1}</span>
                   <div className="flex-1 min-w-0">
                     <p className="leading-snug line-clamp-2">{hq.question!.question}</p>
-                    <p className="text-muted-foreground/70 text-[10px] mt-0.5">
-                      {hq.question!.topic} · {hq.totalAttempts} attempts · <span className={hq.accuracy < 40 ? "text-red-500" : "text-amber-600"}>{hq.accuracy}%</span>
-                    </p>
+                    <p className="text-muted-foreground/60 text-[10px] mt-0.5">{hq.question!.topic} · {hq.totalAttempts} attempts · <span className={hq.accuracy < 40 ? "text-destructive" : "text-warning"}>{hq.accuracy}%</span></p>
                   </div>
                 </div>
               ))}
@@ -233,9 +186,9 @@ const Analytics = () => {
       )}
 
       {totalAttempts === 0 && (
-        <Card className="glass-card rounded-2xl">
+        <Card className="rounded-2xl border-0 shadow-sm">
           <CardContent className="py-12 text-center">
-            <BarChart3 className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+            <BarChart3 className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">No quiz data yet. Analytics will appear after students take quizzes.</p>
           </CardContent>
         </Card>

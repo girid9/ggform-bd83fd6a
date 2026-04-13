@@ -8,16 +8,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Search, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 
-interface Question {
-  id: string;
-  topic: string;
-  question: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
-  correct_answer: string;
-}
+interface Question { id: string; topic: string; question: string; option_a: string; option_b: string; option_c: string; option_d: string; correct_answer: string; }
 
 const QuestionBank = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -51,54 +42,42 @@ const QuestionBank = () => {
 
   const groupedByTopic = useMemo(() => {
     const map = new Map<string, Question[]>();
-    filtered.forEach((q) => {
-      if (!map.has(q.topic)) map.set(q.topic, []);
-      map.get(q.topic)!.push(q);
-    });
+    filtered.forEach((q) => { if (!map.has(q.topic)) map.set(q.topic, []); map.get(q.topic)!.push(q); });
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filtered]);
 
   const toggleTopic = (topic: string) => {
-    setExpandedTopics((prev) => {
-      const next = new Set(prev);
-      if (next.has(topic)) next.delete(topic);
-      else next.add(topic);
-      return next;
-    });
+    setExpandedTopics((prev) => { const next = new Set(prev); if (next.has(topic)) next.delete(topic); else next.add(topic); return next; });
   };
 
   return (
-    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto nature-gradient">
-      <div className="fixed top-4 right-4 z-20"><DarkModeToggle /></div>
+    <div className="min-h-screen px-4 py-6 max-w-2xl mx-auto page-bg">
+      <div className="fixed top-5 right-5 z-20"><DarkModeToggle /></div>
 
       <Link to="/admin" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4">
         <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
       </Link>
 
       <div className="mb-6 animate-fade-up">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-600 to-teal-500 flex items-center justify-center">
-            <BookOpen className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-10 h-10 rounded-2xl bg-primary flex items-center justify-center">
+            <BookOpen className="w-5 h-5 text-primary-foreground" />
           </div>
           <h1 className="text-xl font-bold font-display">Question Bank</h1>
         </div>
-        <p className="text-xs text-muted-foreground">{questions.length} questions across {topics.length} topics</p>
+        <p className="text-xs text-muted-foreground ml-[52px]">{questions.length} questions across {topics.length} topics</p>
       </div>
 
       <div className="flex gap-2 mb-5">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
-          <Input placeholder="Search questions..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-9 text-sm rounded-xl" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+          <Input placeholder="Search questions..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 h-10 text-sm rounded-xl" />
         </div>
         <Select value={topicFilter} onValueChange={setTopicFilter}>
-          <SelectTrigger className="w-40 h-9 text-xs rounded-xl">
-            <SelectValue placeholder="All topics" />
-          </SelectTrigger>
+          <SelectTrigger className="w-40 h-10 text-xs rounded-xl"><SelectValue placeholder="All topics" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All topics ({questions.length})</SelectItem>
-            {topics.map(([topic, count]) => (
-              <SelectItem key={topic} value={topic}>{topic} ({count})</SelectItem>
-            ))}
+            {topics.map(([topic, count]) => (<SelectItem key={topic} value={topic}>{topic} ({count})</SelectItem>))}
           </SelectContent>
         </Select>
       </div>
@@ -106,7 +85,7 @@ const QuestionBank = () => {
       {loading ? (
         <div className="text-center py-16 text-sm text-muted-foreground">Loading questions…</div>
       ) : filtered.length === 0 ? (
-        <Card className="glass-card rounded-2xl">
+        <Card className="rounded-2xl border-0 shadow-sm">
           <CardContent className="py-16 text-center">
             <Search className="w-10 h-10 text-muted-foreground/20 mx-auto mb-3" />
             <p className="text-sm font-medium font-display">No questions found</p>
@@ -114,43 +93,35 @@ const QuestionBank = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {groupedByTopic.map(([topic, qs], i) => {
             const isExpanded = expandedTopics.has(topic);
             return (
-              <Card key={topic} className="glass-card overflow-hidden rounded-2xl animate-fade-up" style={{ animationDelay: `${Math.min(i * 40, 400)}ms`, animationFillMode: "both" }}>
+              <Card key={topic} className="overflow-hidden rounded-2xl animate-fade-up border-0 shadow-sm" style={{ animationDelay: `${Math.min(i * 40, 400)}ms`, animationFillMode: "both" }}>
                 <button
                   onClick={() => toggleTopic(topic)}
-                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-accent/50 transition-colors"
                 >
                   <div>
                     <p className="text-sm font-semibold font-display">{topic}</p>
-                    <p className="text-[10px] text-muted-foreground">{qs.length} question{qs.length !== 1 ? "s" : ""}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{qs.length} question{qs.length !== 1 ? "s" : ""}</p>
                   </div>
                   {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
                 </button>
                 {isExpanded && (
-                  <div className="border-t border-border/50 divide-y divide-border/30">
+                  <div className="border-t border-border/40 divide-y divide-border/30">
                     {qs.map((q, idx) => (
-                      <div key={q.id} className="px-4 py-3">
-                        <p className="text-xs font-medium mb-2">
-                          <span className="text-muted-foreground mr-1">{idx + 1}.</span>
-                          {q.question}
+                      <div key={q.id} className="px-5 py-4">
+                        <p className="text-xs font-medium mb-2.5">
+                          <span className="text-muted-foreground mr-1.5">{idx + 1}.</span>{q.question}
                         </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                           {(["A", "B", "C", "D"] as const).map((key) => {
                             const text = q[`option_${key.toLowerCase()}` as keyof Question] as string;
                             const isCorrect = q.correct_answer === key;
                             return (
-                              <div
-                                key={key}
-                                className={`rounded-xl px-2.5 py-1.5 text-[11px] ${
-                                  isCorrect
-                                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 font-medium border border-emerald-200 dark:border-emerald-800/30"
-                                    : "bg-muted/50 text-muted-foreground"
-                                }`}
-                              >
-                                <span className="font-semibold mr-1">{key}.</span>{text}
+                              <div key={key} className={`rounded-xl px-3 py-2 text-[11px] ${isCorrect ? "bg-primary/5 text-primary font-medium border border-primary/20" : "bg-secondary text-muted-foreground"}`}>
+                                <span className="font-semibold mr-1.5">{key}.</span>{text}
                               </div>
                             );
                           })}
@@ -165,9 +136,7 @@ const QuestionBank = () => {
         </div>
       )}
 
-      <p className="text-center text-[10px] text-muted-foreground/50 mt-6">
-        Showing {filtered.length} of {questions.length} questions
-      </p>
+      <p className="text-center text-[10px] text-muted-foreground/50 mt-6">Showing {filtered.length} of {questions.length} questions</p>
     </div>
   );
 };
