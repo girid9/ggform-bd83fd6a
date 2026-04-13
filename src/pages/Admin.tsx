@@ -91,13 +91,20 @@ const Admin = () => {
     if (quizMode === "topic" && selectedTopic !== "all") {
       query.eq("topic", selectedTopic);
     }
+    if (quizMode === "sequential") {
+      query.order("created_at", { ascending: true }).limit(size);
+    }
     const { data: questions } = await query;
     if (!questions || questions.length < size) {
       toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`);
       return;
     }
-    const shuffled = [...questions].sort(() => Math.random() - 0.5);
-    setPreviewQuestions(shuffled.slice(0, size));
+    if (quizMode === "sequential") {
+      setPreviewQuestions(questions.slice(0, size));
+    } else {
+      const shuffled = [...questions].sort(() => Math.random() - 0.5);
+      setPreviewQuestions(shuffled.slice(0, size));
+    }
     setShowPreview(true);
   };
 
