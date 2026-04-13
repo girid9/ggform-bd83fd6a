@@ -401,8 +401,11 @@ const Admin = () => {
         <CardContent className="py-4 px-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-semibold font-display">Create New Quiz</p>
-            <div className="flex gap-1">
+            <div className="flex gap-1 flex-wrap">
               <Button variant={quizMode === "random" ? "default" : "ghost"} size="sm" className={`text-[10px] h-6 px-2 rounded-lg ${quizMode === "random" ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white" : ""}`} onClick={() => setQuizMode("random")}>Random</Button>
+              <Button variant={quizMode === "sequential" ? "default" : "ghost"} size="sm" className={`text-[10px] h-6 px-2 rounded-lg ${quizMode === "sequential" ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white" : ""}`} onClick={() => setQuizMode("sequential")}>
+                <ListOrdered className="w-3 h-3 mr-1" /> First N
+              </Button>
               <Button variant={quizMode === "topic" ? "default" : "ghost"} size="sm" className={`text-[10px] h-6 px-2 rounded-lg ${quizMode === "topic" ? "bg-gradient-to-r from-emerald-600 to-teal-500 text-white" : ""}`} onClick={() => setQuizMode("topic")}>
                 <Filter className="w-3 h-3 mr-1" /> By Topic
               </Button>
