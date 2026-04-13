@@ -323,6 +323,9 @@ const Admin = () => {
             <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1.5 text-xs h-8 rounded-xl">
               <Copy className="w-3 h-3" /> Link
             </Button>
+            <Button variant="outline" size="sm" onClick={clearResults} className="gap-1.5 text-xs h-8 rounded-xl text-destructive hover:text-destructive">
+              <Trash2 className="w-3 h-3" /> Clear
+            </Button>
           </div>
         </div>
 
