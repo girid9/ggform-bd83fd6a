@@ -11,6 +11,7 @@ import { FloatingInput } from "@/components/FloatingInput";
 import { StepProgress } from "@/components/StepProgress";
 import { SuccessScreen } from "@/components/SuccessScreen";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
+import Leaderboard from "@/components/Leaderboard";
 
 interface Question {
   id: string;
@@ -383,6 +384,10 @@ const Quiz = () => {
           </p>
         </CardContent>
       </Card>
+
+      <div className="mb-6">
+        <Leaderboard sessionId={sessionId} />
+      </div>
 
       <h2 className="text-base font-bold font-display mb-3">Answer Review</h2>
       <div className="space-y-3">
