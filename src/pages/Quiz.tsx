@@ -258,7 +258,7 @@ const Quiz = () => {
           ))}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <div className="fixed bottom-0 left-0 right-0 p-4 safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent">
           <div className="max-w-xl mx-auto">
             <Button
               size="lg"
@@ -330,7 +330,7 @@ const Quiz = () => {
           })}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <div className="fixed bottom-0 left-0 right-0 p-4 safe-bottom bg-gradient-to-t from-background via-background/95 to-transparent">
           <div className="max-w-xl mx-auto">
             <Button
               size="lg"
