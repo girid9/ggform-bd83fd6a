@@ -236,6 +236,23 @@ const Admin = () => {
     }
   };
 
+  const clearResults = async () => {
+    if (!selectedSession) return;
+    const confirmed = window.confirm("Are you sure you want to clear all student results for this quiz? This cannot be undone.");
+    if (!confirmed) return;
+    const { error } = await supabase
+      .from("quiz_attempts")
+      .delete()
+      .eq("session_id", selectedSession.id);
+    if (error) {
+      toast.error("Failed to clear results");
+      console.error(error);
+    } else {
+      setAttempts([]);
+      toast.success("All results cleared!");
+    }
+  };
+
   const handlePasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (passcode === ADMIN_PASSCODE) {
