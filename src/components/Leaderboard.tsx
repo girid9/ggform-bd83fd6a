@@ -31,28 +31,39 @@ const Leaderboard = ({ sessionId }: Props) => {
 
   if (entries.length === 0) return null;
 
-  const medalColors = ["text-yellow-500", "text-gray-400", "text-amber-600"];
+  const medalBg = ["bg-amber-50 dark:bg-amber-500/10", "bg-slate-50 dark:bg-slate-500/10", "bg-orange-50 dark:bg-orange-500/10"];
+  const medalText = ["text-amber-500", "text-slate-400", "text-orange-500"];
 
   return (
-    <Card className="rounded-2xl border-0 shadow-sm">
-      <CardHeader className="pb-3 px-5">
+    <Card className="rounded-2xl border-0 shadow-sm overflow-hidden">
+      <CardHeader className="pb-2 px-5 pt-5">
         <CardTitle className="text-sm flex items-center gap-2 font-display">
-          <Trophy className="w-4 h-4 text-yellow-500" /> Leaderboard
+          <div className="w-7 h-7 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+            <Trophy className="w-4 h-4 text-amber-500" />
+          </div>
+          Leaderboard
         </CardTitle>
       </CardHeader>
-      <CardContent className="px-5">
-        <div className="space-y-2.5">
+      <CardContent className="px-5 pb-5">
+        <div className="space-y-1">
           {entries.slice(0, 10).map((e, i) => (
-            <div key={e.student_name} className="flex items-center gap-3 text-sm">
-              <span className="w-7 text-center">
+            <div
+              key={e.student_name}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors ${
+                i < 3 ? medalBg[i] : "hover:bg-accent/50"
+              }`}
+            >
+              <span className="w-7 text-center flex-shrink-0">
                 {i < 3 ? (
-                  <Medal className={`w-4.5 h-4.5 inline ${medalColors[i]}`} />
+                  <Medal className={`w-4.5 h-4.5 inline ${medalText[i]}`} />
                 ) : (
-                  <span className="text-xs text-muted-foreground font-semibold">{i + 1}</span>
+                  <span className="text-xs text-muted-foreground/60 font-bold tabular-nums">{i + 1}</span>
                 )}
               </span>
-              <span className="flex-1 font-medium truncate">{e.student_name}</span>
-              <span className={`chip text-xs font-bold ${e.bestScore >= 60 ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+              <span className="flex-1 text-sm font-medium truncate">{e.student_name}</span>
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                e.bestScore >= 60 ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
+              }`}>
                 {e.bestScore}%
               </span>
             </div>

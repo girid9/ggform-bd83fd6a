@@ -186,21 +186,21 @@ const Admin = () => {
   if (!authenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden page-bg">
-        <div className="absolute top-5 right-5"><DarkModeToggle /></div>
-        <div className="absolute top-[-15%] right-[-15%] w-[450px] h-[450px] rounded-full bg-primary/5 -z-10" />
+        <div className="absolute top-4 right-4"><DarkModeToggle /></div>
+        <div className="absolute top-[-20%] right-[-20%] w-[500px] h-[500px] rounded-full bg-primary/[0.04] -z-10 blur-3xl" />
 
-        <Card className="w-full max-w-sm animate-fade-up rounded-3xl border-0 shadow-xl shadow-black/5">
-          <CardHeader className="text-center pb-4 pt-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary shadow-lg shadow-primary/20 mx-auto mb-4">
+        <Card className="w-full max-w-sm animate-fade-up rounded-3xl border-0 shadow-xl shadow-black/[0.06] dark:shadow-black/20">
+          <CardHeader className="text-center pb-2 pt-10">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-emerald-500 shadow-lg shadow-primary/20 mx-auto mb-5">
               <Lock className="w-7 h-7 text-primary-foreground" />
             </div>
             <CardTitle className="text-xl font-display">Tutor Access</CardTitle>
-            <CardDescription>Enter the passcode to continue</CardDescription>
+            <CardDescription className="text-sm mt-1">Enter the passcode to continue</CardDescription>
           </CardHeader>
-          <CardContent className="pb-8">
-            <form onSubmit={handlePasscode} className="space-y-4">
+          <CardContent className="pb-8 pt-4">
+            <form onSubmit={handlePasscode} className="space-y-5">
               <FloatingInput type="password" label="Enter passcode" value={passcode} onChange={(e) => setPasscode(e.target.value)} />
-              <Button type="submit" className="w-full h-12 btn-primary text-sm">
+              <Button type="submit" className="w-full h-13 btn-primary text-sm">
                 Unlock
               </Button>
             </form>
@@ -217,36 +217,38 @@ const Admin = () => {
   /* ─── SESSION DETAIL ─── */
   if (selectedSession) {
     return (
-      <div className="min-h-screen px-4 py-6 max-w-xl mx-auto page-bg">
+      <div className="min-h-screen px-4 py-6 max-w-lg mx-auto page-bg">
         <Button variant="ghost" size="sm" onClick={() => { setSelectedSession(null); setAttempts([]); }} className="mb-4 gap-1.5 text-muted-foreground hover:text-foreground -ml-2 rounded-full">
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
 
         <div className="flex items-start justify-between gap-3 mb-5 animate-fade-up">
           <div>
-            <h2 className="text-lg font-bold font-display">{selectedSession.session_code}</h2>
-            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+            <h2 className="text-lg font-bold font-display tracking-wide">{selectedSession.session_code}</h2>
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
               <Calendar className="w-3 h-3" />
               {new Date(selectedSession.created_at).toLocaleDateString()} · {selectedSession.question_ids.length} Qs
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Button variant="outline" size="sm" onClick={regenerateQuiz} disabled={creating} className="gap-1.5 text-xs h-8 rounded-full">
-              {creating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Regenerate
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-1.5 text-xs h-8 rounded-full">
-              <Download className="w-3 h-3" /> Export
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1.5 text-xs h-8 rounded-full">
-              <Copy className="w-3 h-3" /> Link
-            </Button>
-          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          <Button variant="outline" size="sm" onClick={regenerateQuiz} disabled={creating} className="gap-1.5 text-xs h-9 rounded-xl flex-1">
+            {creating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Regenerate
+          </Button>
+          <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-1.5 text-xs h-9 rounded-xl flex-1">
+            <Download className="w-3 h-3" /> Export
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1.5 text-xs h-9 rounded-xl flex-1">
+            <Copy className="w-3 h-3" /> Link
+          </Button>
         </div>
 
         <div className="mb-5"><Leaderboard sessionId={selectedSession.id} /></div>
 
         {attempts.length === 0 ? (
-          <Card className="glass-card rounded-2xl border-0">
+          <Card className="rounded-2xl border-0 shadow-sm">
             <CardContent className="py-0"><EmptyState icon="students" title="No responses yet" description="Share the quiz link with students" /></CardContent>
           </Card>
         ) : (
@@ -256,7 +258,7 @@ const Admin = () => {
                 <TableRow className="hover:bg-transparent">
                   <TableHead className="text-xs">Student</TableHead>
                   <TableHead className="text-xs text-center">Score</TableHead>
-                  <TableHead className="text-xs text-right">View</TableHead>
+                  <TableHead className="text-xs text-right w-14">View</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -264,10 +266,10 @@ const Admin = () => {
                   const pct = Math.round((a.score / a.total_questions) * 100);
                   const passed = pct >= 60;
                   return (
-                    <TableRow key={a.id} className="cursor-pointer" onClick={() => setSelectedStudent(a)}>
+                    <TableRow key={a.id} className="cursor-pointer active:bg-accent/50" onClick={() => setSelectedStudent(a)}>
                       <TableCell>
                         <p className="text-sm font-medium">{a.student_name}</p>
-                        <p className="text-[10px] text-muted-foreground">{new Date(a.created_at).toLocaleString()}</p>
+                        <p className="text-[10px] text-muted-foreground/60">{new Date(a.created_at).toLocaleString()}</p>
                       </TableCell>
                       <TableCell className="text-center">
                         <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold ${passed ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
@@ -290,16 +292,16 @@ const Admin = () => {
 
   /* ─── DASHBOARD ─── */
   return (
-    <div className="min-h-screen px-4 py-6 max-w-xl mx-auto page-bg">
+    <div className="min-h-screen px-4 py-6 max-w-lg mx-auto page-bg">
       <div className="flex items-start justify-between gap-3 mb-6 animate-fade-up">
         <div>
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Home</Link>
-          <h1 className="text-xl font-bold mt-1 font-display">Tutor Dashboard</h1>
+          <h1 className="text-xl font-bold mt-1.5 font-display">Tutor Dashboard</h1>
         </div>
         <div className="flex items-center gap-2">
           <DarkModeToggle />
           <Link to="/analytics">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0 rounded-full">
+            <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0 rounded-xl h-9">
               <BarChart3 className="w-3.5 h-3.5" /> Analytics
             </Button>
           </Link>
@@ -310,12 +312,20 @@ const Admin = () => {
       <Card className="mb-5 rounded-2xl border-0 shadow-sm">
         <CardContent className="py-5 px-5">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold font-display">Create New Quiz</p>
-            <div className="flex gap-1">
-              <Button variant={quizMode === "random" ? "default" : "ghost"} size="sm" className={`text-[10px] h-7 px-3 rounded-full ${quizMode === "random" ? "btn-primary" : ""}`} onClick={() => setQuizMode("random")}>Random</Button>
-              <Button variant={quizMode === "topic" ? "default" : "ghost"} size="sm" className={`text-[10px] h-7 px-3 rounded-full ${quizMode === "topic" ? "btn-primary" : ""}`} onClick={() => setQuizMode("topic")}>
-                <Filter className="w-3 h-3 mr-1" /> By Topic
-              </Button>
+            <p className="text-sm font-bold font-display">Create Quiz</p>
+            <div className="flex gap-1 bg-secondary rounded-xl p-0.5">
+              <button
+                className={`text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all ${quizMode === "random" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                onClick={() => setQuizMode("random")}
+              >
+                Random
+              </button>
+              <button
+                className={`text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1 ${quizMode === "topic" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+                onClick={() => setQuizMode("topic")}
+              >
+                <Filter className="w-3 h-3" /> Topic
+              </button>
             </div>
           </div>
 
@@ -340,11 +350,11 @@ const Admin = () => {
                 {[10, 15, 20, 25, 30, 40, 50].map((n) => (<SelectItem key={n} value={String(n)}>{n} questions</SelectItem>))}
               </SelectContent>
             </Select>
-            <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1 btn-primary h-10">
+            <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1 btn-primary h-10 text-xs">
               {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
               Preview & Create
             </Button>
-            <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-10 rounded-full">
+            <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-10 rounded-xl">
               <Plus className="w-3.5 h-3.5" /> Quick
             </Button>
           </div>
@@ -353,12 +363,12 @@ const Admin = () => {
 
       {/* Preview */}
       {showPreview && previewQuestions.length > 0 && (
-        <Card className="mb-5 border-primary/20 rounded-2xl animate-scale-in shadow-sm border-0 ring-1 ring-primary/10">
+        <Card className="mb-5 rounded-2xl animate-scale-in shadow-sm border-0 ring-1 ring-primary/15">
           <CardContent className="py-5 px-5">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold font-display">Preview ({previewQuestions.length} questions)</p>
+              <p className="text-sm font-bold font-display">Preview ({previewQuestions.length})</p>
               <div className="flex gap-2">
-                <Button size="sm" variant="ghost" className="text-xs h-8 rounded-full" onClick={() => setShowPreview(false)}>Cancel</Button>
+                <Button size="sm" variant="ghost" className="text-xs h-8 rounded-xl" onClick={() => setShowPreview(false)}>Cancel</Button>
                 <Button size="sm" className="text-xs h-8 font-semibold btn-primary" onClick={publishQuiz} disabled={creating}>
                   {creating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
                   Publish Quiz
@@ -367,12 +377,12 @@ const Admin = () => {
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {previewQuestions.map((q, idx) => (
-                <div key={q.id} className="flex items-start justify-between gap-2 rounded-xl bg-secondary px-4 py-2.5">
+                <div key={q.id} className="flex items-start justify-between gap-2 rounded-xl bg-secondary/80 px-4 py-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium truncate"><span className="text-muted-foreground mr-1">{idx + 1}.</span>{q.question}</p>
-                    <p className="text-[9px] text-muted-foreground/60 mt-0.5">{q.topic}</p>
+                    <p className="text-[11px] font-medium truncate"><span className="text-muted-foreground/60 mr-1.5">{idx + 1}.</span>{q.question}</p>
+                    <p className="text-[9px] text-muted-foreground/50 mt-0.5 uppercase tracking-wider">{q.topic}</p>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-[10px] h-7 px-2 shrink-0 rounded-full" onClick={() => swapQuestion(idx)}>
+                  <Button variant="ghost" size="sm" className="text-[10px] h-7 px-2 shrink-0 rounded-lg" onClick={() => swapQuestion(idx)}>
                     <RefreshCw className="w-3 h-3" />
                   </Button>
                 </div>
@@ -383,14 +393,14 @@ const Admin = () => {
       )}
 
       {/* Quick links */}
-      <div className="flex flex-col sm:flex-row gap-2 mb-5">
+      <div className="flex gap-2 mb-5">
         <Link to="/questions" className="flex-1">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full rounded-full h-10">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full rounded-xl h-11">
             <BookOpen className="w-3.5 h-3.5" /> Question Bank
           </Button>
         </Link>
         <Link to="/import" className="flex-1">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full rounded-full h-10">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full rounded-xl h-11">
             <Upload className="w-3.5 h-3.5" /> Import Questions
           </Button>
         </Link>
@@ -402,27 +412,28 @@ const Admin = () => {
           <CardContent className="py-0"><EmptyState icon="quiz" title="No quizzes yet" description="Create your first quiz to get started" actionLabel="Create Quiz" onAction={createQuizDirect} /></CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2.5">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1">Recent Quizzes</p>
           {sessions.map((s, i) => (
             <Card
               key={s.id}
-              className="cursor-pointer hover:shadow-md transition-all active:scale-[0.99] rounded-2xl animate-fade-up border-0 shadow-sm"
+              className="card-interactive rounded-2xl animate-fade-up border-0 shadow-sm"
               style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
               onClick={() => setSelectedSession(s)}
             >
               <CardContent className="flex items-center justify-between py-4 px-5">
                 <div>
                   <p className="font-bold text-base tracking-wide font-display">{s.session_code}</p>
-                  <p className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                  <p className="text-[11px] text-muted-foreground/60 flex items-center gap-1.5 mt-1">
                     <Calendar className="w-3 h-3" />
                     {new Date(s.created_at).toLocaleDateString()} · {s.question_ids.length} Qs
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); copyLink(s.session_code); }} className="gap-1.5 text-xs h-9 rounded-full">
+                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); copyLink(s.session_code); }} className="gap-1.5 text-xs h-9 rounded-xl">
                     <Copy className="w-3 h-3" /> Copy
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={(e) => deleteSession(s.id, e)} className="h-9 w-9 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                  <Button variant="ghost" size="icon" onClick={(e) => deleteSession(s.id, e)} className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                     <Trash2 className="w-3.5 h-3.5" />
                   </Button>
                 </div>
