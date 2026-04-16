@@ -22,6 +22,7 @@ interface QuizSession {
   session_code: string;
   created_at: string;
   question_ids: string[];
+  name: string;
 }
 
 interface QuizAttempt {
@@ -102,28 +103,51 @@ const Admin = () => {
     toast.success("Question swapped!");
   };
 
+  const getQuizName = () => {
+    if (selectedTopics.length === 0) return "All Topics";
+    if (selectedTopics.length === 1) return selectedTopics[0];
+    return `${selectedTopics.length} Topics Mix`;
+  };
+
+  const splitAndInsert = async (allIds: string[], baseName: string) => {
+    if (allIds.length <= 20) {
+      const code = generateSessionCode();
+      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: allIds, name: baseName });
+      if (error) { toast.error("Failed to create quiz"); console.error(error); return; }
+      toast.success(`Quiz "${baseName}" created with ${allIds.length} questions!`);
+    } else {
+      const mid = Math.ceil(allIds.length / 2);
+      const parts = [allIds.slice(0, mid), allIds.slice(mid)];
+      for (let i = 0; i < parts.length; i++) {
+        const code = generateSessionCode();
+        const partName = `${baseName} - Part ${i + 1}`;
+        const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: parts[i], name: partName });
+        if (error) { toast.error(`Failed to create ${partName}`); console.error(error); return; }
+      }
+      toast.success(`Created 2 quizzes: "${baseName} - Part 1" (${parts[0].length} Qs) & "Part 2" (${parts[1].length} Qs)`);
+    }
+    fetchSessions();
+  };
+
   const publishQuiz = async () => {
     if (previewQuestions.length === 0) return;
     setCreating(true);
     try {
-      const code = generateSessionCode();
-      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: previewQuestions.map((q) => q.id) });
-      if (error) { toast.error("Failed to create quiz"); console.error(error); }
-      else { toast.success(`Quiz created with ${previewQuestions.length} questions!`); setShowPreview(false); setPreviewQuestions([]); fetchSessions(); }
+      await splitAndInsert(previewQuestions.map((q) => q.id), getQuizName());
+      setShowPreview(false); setPreviewQuestions([]);
     } finally { setCreating(false); }
   };
 
   const createQuizDirect = async () => {
     setCreating(true);
     try {
-      const query = supabase.from("quiz_questions").select("id");
+      const query = supabase.from("quiz_questions").select("id, topic");
       if (selectedTopics.length > 0) query.in("topic", selectedTopics);
       const { data: questions } = await query;
       if (!questions || questions.length === 0) { toast.error("No questions found"); return; }
-      const code = generateSessionCode();
-      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: questions.map((q) => q.id) });
-      if (error) { toast.error("Failed to create quiz"); console.error(error); }
-      else { toast.success(`Quiz created with ${questions.length} questions!`); fetchSessions(); }
+      // Sort by topic for topic-wise grouping
+      const sorted = [...questions].sort((a, b) => a.topic.localeCompare(b.topic));
+      await splitAndInsert(sorted.map((q) => q.id), getQuizName());
     } finally { setCreating(false); }
   };
 
@@ -192,10 +216,10 @@ const Admin = () => {
 
         <div className="flex items-start justify-between gap-3 mb-5 animate-fade-up">
           <div>
-            <h2 className="text-lg font-bold font-display tracking-wide">{selectedSession.session_code}</h2>
+            <h2 className="text-lg font-bold font-display tracking-wide">{selectedSession.name || selectedSession.session_code}</h2>
             <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
               <Calendar className="w-3 h-3" />
-              {new Date(selectedSession.created_at).toLocaleDateString()} · {selectedSession.question_ids.length} Qs
+              {new Date(selectedSession.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {selectedSession.question_ids.length} Qs · <span className="font-mono">{selectedSession.session_code}</span>
             </p>
           </div>
         </div>
@@ -381,10 +405,10 @@ const Admin = () => {
             >
               <CardContent className="flex items-center justify-between py-4 px-5">
                 <div>
-                  <p className="font-bold text-base tracking-wide font-display">{s.session_code}</p>
+                  <p className="font-bold text-base tracking-wide font-display">{s.name || s.session_code}</p>
                   <p className="text-[11px] text-muted-foreground/60 flex items-center gap-1.5 mt-1">
                     <Calendar className="w-3 h-3" />
-                    {new Date(s.created_at).toLocaleDateString()} · {s.question_ids.length} Qs
+                    {new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {s.question_ids.length} Qs · <span className="font-mono text-[10px]">{s.session_code}</span>
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
