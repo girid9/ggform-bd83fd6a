@@ -322,16 +322,16 @@ const Quiz = () => {
                 NEXT
              </Button>
           ) : (
-            <Button
-              size="lg"
-              className="flex-1 h-16 btn-primary text-lg"
-              onClick={() => setShowTestConfirmation(true)}
-              disabled={!hasGuessed}
-            >
-              START QUIZ
-            </Button>
-          )}
-        </div>
+             <Button
+               size="lg"
+               className="flex-1 h-16 btn-primary text-lg"
+               onClick={() => setShowStudyReview(true)}
+               disabled={!hasGuessed}
+             >
+               REVIEW
+             </Button>
+           )}
+         </div>
       </div>
     );
   }
