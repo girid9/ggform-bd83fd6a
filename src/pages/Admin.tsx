@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateSessionCode } from "@/lib/shuffle";
 import { toast } from "sonner";
-import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw, BookOpen, Filter, Upload, Trash2 } from "lucide-react";
+import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw, BookOpen, Upload, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
@@ -41,10 +41,8 @@ const Admin = () => {
   const [attempts, setAttempts] = useState<QuizAttempt[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<QuizAttempt | null>(null);
   const [creating, setCreating] = useState(false);
-  const [quizSize, setQuizSize] = useState("20");
-  const [quizMode, setQuizMode] = useState<"random" | "topic">("random");
   const [topics, setTopics] = useState<{ topic: string; count: number }[]>([]);
-  const [selectedTopic, setSelectedTopic] = useState("all");
+  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
   const [previewQuestions, setPreviewQuestions] = useState<{ id: string; question: string; topic: string }[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -79,27 +77,26 @@ const Admin = () => {
   };
 
   const generatePreview = async () => {
-    const size = parseInt(quizSize);
     const query = supabase.from("quiz_questions").select("id, question, topic");
-    if (quizMode === "topic" && selectedTopic !== "all") query.eq("topic", selectedTopic);
+    if (selectedTopics.length > 0) query.in("topic", selectedTopics);
     const { data: questions } = await query;
-    if (!questions || questions.length < size) {
-      toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`);
+    if (!questions || questions.length === 0) {
+      toast.error("No questions found for selected topics");
       return;
     }
-    const shuffled = [...questions].sort(() => Math.random() - 0.5);
-    setPreviewQuestions(shuffled.slice(0, size));
+    // Sort by topic for topic-wise grouping
+    const sorted = [...questions].sort((a, b) => a.topic.localeCompare(b.topic));
+    setPreviewQuestions(sorted);
     setShowPreview(true);
   };
 
   const swapQuestion = async (index: number) => {
     const currentIds = new Set(previewQuestions.map((q) => q.id));
-    const query = supabase.from("quiz_questions").select("id, question, topic");
-    if (quizMode === "topic" && selectedTopic !== "all") query.eq("topic", selectedTopic);
-    const { data: all } = await query;
+    const currentQ = previewQuestions[index];
+    const { data: all } = await supabase.from("quiz_questions").select("id, question, topic").eq("topic", currentQ.topic);
     if (!all) return;
     const available = all.filter((q) => !currentIds.has(q.id));
-    if (available.length === 0) { toast.error("No more questions available to swap"); return; }
+    if (available.length === 0) { toast.error("No more questions available to swap in this topic"); return; }
     const replacement = available[Math.floor(Math.random() * available.length)];
     setPreviewQuestions((prev) => prev.map((q, i) => (i === index ? replacement : q)));
     toast.success("Question swapped!");
@@ -119,15 +116,14 @@ const Admin = () => {
   const createQuizDirect = async () => {
     setCreating(true);
     try {
-      const size = parseInt(quizSize);
-      const { data: questions } = await supabase.from("quiz_questions").select("id");
-      if (!questions || questions.length < size) { toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`); return; }
-      const shuffled = [...questions].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, size).map((q) => q.id);
+      const query = supabase.from("quiz_questions").select("id");
+      if (selectedTopics.length > 0) query.in("topic", selectedTopics);
+      const { data: questions } = await query;
+      if (!questions || questions.length === 0) { toast.error("No questions found"); return; }
       const code = generateSessionCode();
-      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: selected });
+      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: questions.map((q) => q.id) });
       if (error) { toast.error("Failed to create quiz"); console.error(error); }
-      else { toast.success(`Quiz created with ${size} questions!`); fetchSessions(); }
+      else { toast.success(`Quiz created with ${questions.length} questions!`); fetchSessions(); }
     } finally { setCreating(false); }
   };
 
@@ -283,51 +279,41 @@ const Admin = () => {
       {/* Create Quiz */}
       <Card className="mb-5 rounded-2xl border-0 shadow-sm">
         <CardContent className="py-5 px-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-bold font-display">Create Quiz</p>
-            <div className="flex gap-1 bg-secondary rounded-xl p-0.5">
-              <button
-                className={`text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all ${quizMode === "random" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setQuizMode("random")}
-              >
-                Random
-              </button>
-              <button
-                className={`text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1 ${quizMode === "topic" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setQuizMode("topic")}
-              >
-                <Filter className="w-3 h-3" /> Topic
-              </button>
-            </div>
-          </div>
+          <p className="text-sm font-bold font-display mb-4">Create Quiz</p>
 
-          {quizMode === "topic" && (
-            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-              <SelectTrigger className="w-full h-10 text-xs mb-3 rounded-xl">
-                <SelectValue placeholder="Select topic" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All topics</SelectItem>
-                {topics.map((t) => (<SelectItem key={t.topic} value={t.topic}>{t.topic} ({t.count})</SelectItem>))}
-              </SelectContent>
-            </Select>
-          )}
+          <p className="text-[11px] font-medium text-muted-foreground mb-2 uppercase tracking-wider">Select Topics</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {topics.map((t) => {
+              const isSelected = selectedTopics.includes(t.topic);
+              return (
+                <button
+                  key={t.topic}
+                  onClick={() => setSelectedTopics(prev => isSelected ? prev.filter(x => x !== t.topic) : [...prev, t.topic])}
+                  className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all border ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-secondary text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t.topic} ({t.count})
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-muted-foreground mb-3">
+            {selectedTopics.length === 0 
+              ? `All topics selected · ${topics.reduce((s, t) => s + t.count, 0)} questions`
+              : `${selectedTopics.length} topic${selectedTopics.length > 1 ? 's' : ''} · ${topics.filter(t => selectedTopics.includes(t.topic)).reduce((s, t) => s + t.count, 0)} questions`
+            }
+          </p>
 
           <div className="flex items-center gap-2">
-            <Select value={quizSize} onValueChange={setQuizSize}>
-              <SelectTrigger className="w-28 h-10 text-xs rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[10, 15, 20, 25, 30, 40, 50].map((n) => (<SelectItem key={n} value={String(n)}>{n} questions</SelectItem>))}
-              </SelectContent>
-            </Select>
             <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1 btn-primary h-10 text-xs">
               {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
               Preview & Create
             </Button>
             <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-10 rounded-xl">
-              <Plus className="w-3.5 h-3.5" /> Quick
+              <Plus className="w-3.5 h-3.5" /> Quick Create
             </Button>
           </div>
         </CardContent>
