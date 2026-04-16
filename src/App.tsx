@@ -10,6 +10,7 @@ import Analytics from "./pages/Analytics";
 import QuestionBank from "./pages/QuestionBank";
 import ImportQuestions from "./pages/ImportQuestions";
 import NotFound from "./pages/NotFound";
+import LearnHub from "./pages/LearnHub";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/questions" element={<QuestionBank />} />
           <Route path="/import" element={<ImportQuestions />} />
           <Route path="/quiz/:code" element={<Quiz />} />
+          <Route path="/learn" element={<LearnHub />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
