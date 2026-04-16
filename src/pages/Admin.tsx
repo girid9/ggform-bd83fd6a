@@ -103,28 +103,51 @@ const Admin = () => {
     toast.success("Question swapped!");
   };
 
+  const getQuizName = () => {
+    if (selectedTopics.length === 0) return "All Topics";
+    if (selectedTopics.length === 1) return selectedTopics[0];
+    return `${selectedTopics.length} Topics Mix`;
+  };
+
+  const splitAndInsert = async (allIds: string[], baseName: string) => {
+    if (allIds.length <= 20) {
+      const code = generateSessionCode();
+      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: allIds, name: baseName });
+      if (error) { toast.error("Failed to create quiz"); console.error(error); return; }
+      toast.success(`Quiz "${baseName}" created with ${allIds.length} questions!`);
+    } else {
+      const mid = Math.ceil(allIds.length / 2);
+      const parts = [allIds.slice(0, mid), allIds.slice(mid)];
+      for (let i = 0; i < parts.length; i++) {
+        const code = generateSessionCode();
+        const partName = `${baseName} - Part ${i + 1}`;
+        const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: parts[i], name: partName });
+        if (error) { toast.error(`Failed to create ${partName}`); console.error(error); return; }
+      }
+      toast.success(`Created 2 quizzes: "${baseName} - Part 1" (${parts[0].length} Qs) & "Part 2" (${parts[1].length} Qs)`);
+    }
+    fetchSessions();
+  };
+
   const publishQuiz = async () => {
     if (previewQuestions.length === 0) return;
     setCreating(true);
     try {
-      const code = generateSessionCode();
-      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: previewQuestions.map((q) => q.id) });
-      if (error) { toast.error("Failed to create quiz"); console.error(error); }
-      else { toast.success(`Quiz created with ${previewQuestions.length} questions!`); setShowPreview(false); setPreviewQuestions([]); fetchSessions(); }
+      await splitAndInsert(previewQuestions.map((q) => q.id), getQuizName());
+      setShowPreview(false); setPreviewQuestions([]);
     } finally { setCreating(false); }
   };
 
   const createQuizDirect = async () => {
     setCreating(true);
     try {
-      const query = supabase.from("quiz_questions").select("id");
+      const query = supabase.from("quiz_questions").select("id, topic");
       if (selectedTopics.length > 0) query.in("topic", selectedTopics);
       const { data: questions } = await query;
       if (!questions || questions.length === 0) { toast.error("No questions found"); return; }
-      const code = generateSessionCode();
-      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: questions.map((q) => q.id) });
-      if (error) { toast.error("Failed to create quiz"); console.error(error); }
-      else { toast.success(`Quiz created with ${questions.length} questions!`); fetchSessions(); }
+      // Sort by topic for topic-wise grouping
+      const sorted = [...questions].sort((a, b) => a.topic.localeCompare(b.topic));
+      await splitAndInsert(sorted.map((q) => q.id), getQuizName());
     } finally { setCreating(false); }
   };
 
