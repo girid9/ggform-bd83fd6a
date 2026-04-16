@@ -77,27 +77,26 @@ const Admin = () => {
   };
 
   const generatePreview = async () => {
-    const size = parseInt(quizSize);
     const query = supabase.from("quiz_questions").select("id, question, topic");
-    if (quizMode === "topic" && selectedTopic !== "all") query.eq("topic", selectedTopic);
+    if (selectedTopics.length > 0) query.in("topic", selectedTopics);
     const { data: questions } = await query;
-    if (!questions || questions.length < size) {
-      toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`);
+    if (!questions || questions.length === 0) {
+      toast.error("No questions found for selected topics");
       return;
     }
-    const shuffled = [...questions].sort(() => Math.random() - 0.5);
-    setPreviewQuestions(shuffled.slice(0, size));
+    // Sort by topic for topic-wise grouping
+    const sorted = [...questions].sort((a, b) => a.topic.localeCompare(b.topic));
+    setPreviewQuestions(sorted);
     setShowPreview(true);
   };
 
   const swapQuestion = async (index: number) => {
     const currentIds = new Set(previewQuestions.map((q) => q.id));
-    const query = supabase.from("quiz_questions").select("id, question, topic");
-    if (quizMode === "topic" && selectedTopic !== "all") query.eq("topic", selectedTopic);
-    const { data: all } = await query;
+    const currentQ = previewQuestions[index];
+    const { data: all } = await supabase.from("quiz_questions").select("id, question, topic").eq("topic", currentQ.topic);
     if (!all) return;
     const available = all.filter((q) => !currentIds.has(q.id));
-    if (available.length === 0) { toast.error("No more questions available to swap"); return; }
+    if (available.length === 0) { toast.error("No more questions available to swap in this topic"); return; }
     const replacement = available[Math.floor(Math.random() * available.length)];
     setPreviewQuestions((prev) => prev.map((q, i) => (i === index ? replacement : q)));
     toast.success("Question swapped!");
