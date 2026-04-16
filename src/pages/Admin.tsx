@@ -116,15 +116,14 @@ const Admin = () => {
   const createQuizDirect = async () => {
     setCreating(true);
     try {
-      const size = parseInt(quizSize);
-      const { data: questions } = await supabase.from("quiz_questions").select("id");
-      if (!questions || questions.length < size) { toast.error(`Not enough questions (need ${size}, have ${questions?.length || 0})`); return; }
-      const shuffled = [...questions].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, size).map((q) => q.id);
+      const query = supabase.from("quiz_questions").select("id");
+      if (selectedTopics.length > 0) query.in("topic", selectedTopics);
+      const { data: questions } = await query;
+      if (!questions || questions.length === 0) { toast.error("No questions found"); return; }
       const code = generateSessionCode();
-      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: selected });
+      const { error } = await supabase.from("quiz_sessions").insert({ session_code: code, question_ids: questions.map((q) => q.id) });
       if (error) { toast.error("Failed to create quiz"); console.error(error); }
-      else { toast.success(`Quiz created with ${size} questions!`); fetchSessions(); }
+      else { toast.success(`Quiz created with ${questions.length} questions!`); fetchSessions(); }
     } finally { setCreating(false); }
   };
 
