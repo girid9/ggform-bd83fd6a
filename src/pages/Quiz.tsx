@@ -50,6 +50,35 @@ const Quiz = () => {
   const [showTestConfirmation, setShowTestConfirmation] = useState(false);
   const [showStudyReview, setShowStudyReview] = useState(false);
 
+  const [aiHints, setAiHints] = useState<Record<string, string>>({});
+  const [aiHintLoading, setAiHintLoading] = useState<Record<string, boolean>>({});
+
+  const fetchAiHint = async (q: Question, studentAnswer: string) => {
+    if (aiHints[q.id] || aiHintLoading[q.id]) return;
+    setAiHintLoading(prev => ({ ...prev, [q.id]: true }));
+    try {
+      const correctText = q[`option_${q.correct_answer.toLowerCase()}` as keyof Question] as string;
+      const studentText = q[`option_${studentAnswer.toLowerCase()}` as keyof Question] as string;
+      const { data, error } = await supabase.functions.invoke("socratic-hint", {
+        body: {
+          question: q.question,
+          correctAnswer: q.correct_answer,
+          correctText,
+          studentAnswer,
+          studentText,
+          topic: q.topic,
+        },
+      });
+      if (error) throw error;
+      setAiHints(prev => ({ ...prev, [q.id]: data.hint }));
+    } catch (e) {
+      console.error("AI hint error:", e);
+      setAiHints(prev => ({ ...prev, [q.id]: "Could not load hint. Try again later." }));
+    } finally {
+      setAiHintLoading(prev => ({ ...prev, [q.id]: false }));
+    }
+  };
+
   const shuffledQuestions = useMemo(() => {
     if (phase !== "quiz") return [];
     return [...questions];
