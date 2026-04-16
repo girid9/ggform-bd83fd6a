@@ -69,6 +69,40 @@
     --input: 0 0% 20%;
     --ring: 0 0% 100%;
   }
+
+  /* Indigo Night — deep navy + vibrant violet, inspired by Dribbble quiz apps & ColorHunt navy palette */
+  .indigo {
+    --background: 235 35% 10%;
+    --foreground: 220 20% 95%;
+
+    --card: 235 30% 14%;
+    --card-foreground: 220 20% 95%;
+
+    --popover: 235 30% 14%;
+    --popover-foreground: 220 20% 95%;
+
+    --primary: 262 83% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 235 25% 20%;
+    --secondary-foreground: 220 20% 90%;
+
+    --muted: 235 25% 18%;
+    --muted-foreground: 230 15% 55%;
+
+    --accent: 262 60% 25%;
+    --accent-foreground: 262 100% 90%;
+
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 235 20% 22%;
+    --input: 235 20% 22%;
+    --ring: 262 83% 58%;
+
+    --success: 160 84% 39%;
+    --warning: 38 92% 50%;
+  }
 }
 
 @layer base {
@@ -114,6 +148,12 @@
     @apply inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-foreground text-background;
   }
 
+  /* Indigo theme chip override */
+  .indigo .chip-primary {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
   .bottom-bar {
     @apply fixed bottom-0 left-0 right-0 p-4 border-t border-border bg-background z-50;
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
@@ -125,6 +165,23 @@
 
   .option-card-selected {
     @apply border-foreground bg-foreground text-background;
+  }
+
+  /* Indigo theme option card overrides */
+  .indigo .option-card-selected {
+    border-color: hsl(var(--primary));
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
+  .indigo .btn-primary {
+    background: linear-gradient(135deg, hsl(262 83% 58%), hsl(280 80% 55%));
+    border-color: transparent;
+    box-shadow: 0 4px 20px -4px hsl(262 83% 58% / 0.4);
+  }
+
+  .indigo .btn-primary:hover {
+    box-shadow: 0 6px 28px -4px hsl(262 83% 58% / 0.6);
   }
 
   .question-counter {
