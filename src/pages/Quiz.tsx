@@ -233,6 +233,97 @@ const Quiz = () => {
       );
     }
 
+    if (showStudyReview) {
+      const wrongQuestions = questions.filter(q => studyAnswers[q.id] && studyAnswers[q.id] !== q.correct_answer);
+      const correctCount = questions.filter(q => studyAnswers[q.id] === q.correct_answer).length;
+
+      return (
+        <div className="flex flex-col min-h-screen px-6 py-12 max-w-2xl mx-auto page-bg">
+          <div className="fixed top-6 right-6 z-50"><DarkModeToggle /></div>
+
+          <div className="animate-slide-up-subtle space-y-8">
+            <div className="border-b-2 border-border pb-4">
+              <span className="chip-primary mb-4 inline-flex">
+                <BookOpen className="w-4 h-4" /> REVIEW
+              </span>
+              <h1 className="text-2xl font-extrabold font-display uppercase">Your Results</h1>
+              <p className="text-sm font-bold text-primary mt-2 uppercase tracking-wider">
+                {correctCount} / {questions.length} correct during practice
+              </p>
+            </div>
+
+            {wrongQuestions.length === 0 ? (
+              <div className="p-8 border-2 border-foreground text-center bg-card">
+                <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-primary" />
+                <p className="text-xl font-black font-display uppercase">Perfect!</p>
+                <p className="text-sm text-muted-foreground mt-2">You got everything right in practice.</p>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-lg font-black font-display uppercase border-b-2 border-foreground pb-2">
+                  What You Got Wrong ({wrongQuestions.length})
+                </h3>
+                <div className="space-y-4">
+                  {wrongQuestions.map((q, idx) => {
+                    const studentAnswer = studyAnswers[q.id];
+                    return (
+                      <div key={q.id} className="border-2 border-foreground p-6 rounded-lg bg-card">
+                        <p className="text-base font-bold leading-tight mb-1">
+                          <span className="mr-2 font-mono">{idx + 1}.</span>{q.question}
+                        </p>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">{q.topic}</p>
+                        <div className="grid gap-3">
+                          {(["A", "B", "C", "D"] as const).map((key) => {
+                            const text = q[`option_${key.toLowerCase()}` as keyof Question] as string;
+                            const isCorrect = q.correct_answer === key;
+                            const isStudentPick = studentAnswer === key;
+                            let cls = "border-border/50 text-muted-foreground opacity-40";
+                            if (isCorrect) cls = "border-foreground bg-foreground text-background font-bold";
+                            else if (isStudentPick) cls = "border-foreground border-dashed text-foreground";
+                            return (
+                              <div key={key} className={`rounded-lg p-4 text-sm border-2 ${cls}`}>
+                                <span className="mr-2 font-mono font-bold">{key}.</span>{text}
+                                {isCorrect && <CheckCircle2 className="w-4 h-4 inline ml-2 -mt-0.5" />}
+                                {isStudentPick && !isCorrect && <XCircle className="w-4 h-4 inline ml-2 -mt-0.5 opacity-70" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+
+            <div className="flex gap-4 pt-4">
+              <Button
+                size="lg"
+                className="flex-1 h-16 btn-secondary text-lg border-2"
+                onClick={() => {
+                  setShowStudyReview(false);
+                  setStudyAnswers({});
+                  setCurrentStudyIndex(0);
+                }}
+              >
+                PRACTICE AGAIN
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1 h-16 btn-primary text-lg"
+                onClick={() => {
+                  setShowStudyReview(false);
+                  setShowTestConfirmation(true);
+                }}
+              >
+                GO TO TEST
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     const q = questions[currentStudyIndex];
     if (!q) return null;
     const opts = shuffledOptions[q.id] || [];
