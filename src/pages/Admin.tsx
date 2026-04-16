@@ -1,17 +1,14 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { generateSessionCode } from "@/lib/shuffle";
 import { toast } from "sonner";
-import { Plus, Copy, Eye, ArrowLeft, Lock, Loader2, Users, Calendar, BarChart3, Download, Trophy, RefreshCw, BookOpen, Upload, Trash2 } from "lucide-react";
+import { Plus, Copy, Eye, ArrowLeft, Loader2, Calendar, BarChart3, Download, RefreshCw, BookOpen, Upload, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentDetail from "@/components/StudentDetail";
 import Leaderboard from "@/components/Leaderboard";
-import { FloatingInput } from "@/components/FloatingInput";
 import { EmptyState } from "@/components/EmptyState";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 
@@ -85,7 +82,6 @@ const Admin = () => {
       toast.error("No questions found for selected topics");
       return;
     }
-    // Sort by topic for topic-wise grouping
     const sorted = [...questions].sort((a, b) => a.topic.localeCompare(b.topic));
     setPreviewQuestions(sorted);
     setShowPreview(true);
@@ -145,7 +141,6 @@ const Admin = () => {
       if (selectedTopics.length > 0) query.in("topic", selectedTopics);
       const { data: questions } = await query;
       if (!questions || questions.length === 0) { toast.error("No questions found"); return; }
-      // Sort by topic for topic-wise grouping
       const sorted = [...questions].sort((a, b) => a.topic.localeCompare(b.topic));
       await splitAndInsert(sorted.map((q) => q.id), getQuizName());
     } finally { setCreating(false); }
@@ -209,30 +204,28 @@ const Admin = () => {
   /* ─── SESSION DETAIL ─── */
   if (selectedSession) {
     return (
-      <div className="min-h-screen px-4 py-6 max-w-lg mx-auto page-bg">
+      <div className="min-h-screen px-4 py-6 pb-24 max-w-lg mx-auto page-bg">
         <Button variant="ghost" size="sm" onClick={() => { setSelectedSession(null); setAttempts([]); }} className="mb-4 gap-1.5 text-muted-foreground hover:text-foreground -ml-2 rounded-full">
           <ArrowLeft className="w-4 h-4" /> Back
         </Button>
 
-        <div className="flex items-start justify-between gap-3 mb-5 animate-fade-up">
-          <div>
-            <h2 className="text-lg font-bold font-display tracking-wide">{selectedSession.name || selectedSession.session_code}</h2>
-            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
-              <Calendar className="w-3 h-3" />
-              {new Date(selectedSession.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {selectedSession.question_ids.length} Qs · <span className="font-mono">{selectedSession.session_code}</span>
-            </p>
-          </div>
+        <div className="mb-5">
+          <h2 className="text-lg font-bold font-display tracking-wide">{selectedSession.name || selectedSession.session_code}</h2>
+          <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1 flex-wrap">
+            <Calendar className="w-3 h-3" />
+            {new Date(selectedSession.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {selectedSession.question_ids.length} Qs · <span className="font-mono">{selectedSession.session_code}</span>
+          </p>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex flex-wrap gap-2 mb-5">
-          <Button variant="outline" size="sm" onClick={regenerateQuiz} disabled={creating} className="gap-1.5 text-xs h-9 rounded-xl flex-1">
-            {creating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Regenerate
+        {/* Action buttons - stacked on mobile */}
+        <div className="grid grid-cols-3 gap-2 mb-5">
+          <Button variant="outline" size="sm" onClick={regenerateQuiz} disabled={creating} className="gap-1 text-[10px] h-11 rounded-xl">
+            {creating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Regen
           </Button>
-          <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-1.5 text-xs h-9 rounded-xl flex-1">
+          <Button variant="outline" size="sm" onClick={exportToCSV} className="gap-1 text-[10px] h-11 rounded-xl">
             <Download className="w-3 h-3" /> Export
           </Button>
-          <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1.5 text-xs h-9 rounded-xl flex-1">
+          <Button variant="outline" size="sm" onClick={() => copyLink(selectedSession.session_code)} className="gap-1 text-[10px] h-11 rounded-xl">
             <Copy className="w-3 h-3" /> Link
           </Button>
         </div>
@@ -284,36 +277,35 @@ const Admin = () => {
 
   /* ─── DASHBOARD ─── */
   return (
-    <div className="min-h-screen px-4 py-6 max-w-lg mx-auto page-bg">
-      <div className="flex items-start justify-between gap-3 mb-6 animate-fade-up">
-        <div>
-          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Home</Link>
-          <h1 className="text-xl font-bold mt-1.5 font-display">Tutor Dashboard</h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <DarkModeToggle />
-          <Link to="/analytics">
-            <Button variant="outline" size="sm" className="gap-1.5 text-xs shrink-0 rounded-xl h-9">
-              <BarChart3 className="w-3.5 h-3.5" /> Analytics
-            </Button>
-          </Link>
-        </div>
+    <div className="min-h-screen px-4 py-6 pb-24 max-w-lg mx-auto page-bg">
+      {/* Header - mobile friendly stacked layout */}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <Link to="/" className="text-xs text-muted-foreground hover:text-foreground transition-colors">← Home</Link>
+        <DarkModeToggle />
+      </div>
+      <div className="flex items-center justify-between gap-3 mb-6">
+        <h1 className="text-xl font-bold font-display">Tutor Dashboard</h1>
+        <Link to="/analytics">
+          <Button variant="outline" size="sm" className="gap-1.5 text-[10px] shrink-0 rounded-xl h-9">
+            <BarChart3 className="w-3.5 h-3.5" /> Analytics
+          </Button>
+        </Link>
       </div>
 
       {/* Create Quiz */}
       <Card className="mb-5 rounded-2xl border-0 shadow-sm">
-        <CardContent className="py-5 px-5">
+        <CardContent className="py-5 px-4">
           <p className="text-sm font-bold font-display mb-4">Create Quiz</p>
 
           <p className="text-[11px] font-medium text-muted-foreground mb-2 uppercase tracking-wider">Select Topics</p>
-          <div className="flex flex-wrap gap-2 mb-4">
+          <div className="flex flex-wrap gap-1.5 mb-4">
             {topics.map((t) => {
               const isSelected = selectedTopics.includes(t.topic);
               return (
                 <button
                   key={t.topic}
                   onClick={() => setSelectedTopics(prev => isSelected ? prev.filter(x => x !== t.topic) : [...prev, t.topic])}
-                  className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all border ${
+                  className={`text-[10px] px-2.5 py-1.5 rounded-full font-medium transition-all border min-h-[36px] ${
                     isSelected
                       ? "bg-primary text-primary-foreground border-primary shadow-sm"
                       : "bg-secondary text-muted-foreground border-border hover:border-foreground hover:text-foreground"
@@ -331,12 +323,12 @@ const Admin = () => {
             }
           </p>
 
-          <div className="flex items-center gap-2">
-            <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1 btn-primary h-10 text-xs">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1 btn-primary h-12 text-xs">
               {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
               Preview & Create
             </Button>
-            <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-10 rounded-xl">
+            <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-12 rounded-xl">
               <Plus className="w-3.5 h-3.5" /> Quick Create
             </Button>
           </div>
@@ -346,22 +338,22 @@ const Admin = () => {
       {/* Preview */}
       {showPreview && previewQuestions.length > 0 && (
         <Card className="mb-5 rounded-2xl animate-scale-in shadow-sm border-0 ring-1 ring-primary/15">
-          <CardContent className="py-5 px-5">
+          <CardContent className="py-5 px-4">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-bold font-display">Preview ({previewQuestions.length})</p>
               <div className="flex gap-2">
                 <Button size="sm" variant="ghost" className="text-xs h-8 rounded-xl" onClick={() => setShowPreview(false)}>Cancel</Button>
                 <Button size="sm" className="text-xs h-8 font-semibold btn-primary" onClick={publishQuiz} disabled={creating}>
                   {creating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : null}
-                  Publish Quiz
+                  Publish
                 </Button>
               </div>
             </div>
             <div className="space-y-2 max-h-60 overflow-y-auto">
               {previewQuestions.map((q, idx) => (
-                <div key={q.id} className="flex items-start justify-between gap-2 rounded-xl bg-secondary/80 px-4 py-3">
+                <div key={q.id} className="flex items-start justify-between gap-2 rounded-xl bg-secondary/80 px-3 py-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-medium truncate"><span className="text-muted-foreground/60 mr-1.5">{idx + 1}.</span>{q.question}</p>
+                    <p className="text-[11px] font-medium leading-snug"><span className="text-muted-foreground/60 mr-1.5">{idx + 1}.</span>{q.question}</p>
                     <p className="text-[9px] text-muted-foreground/50 mt-0.5 uppercase tracking-wider">{q.topic}</p>
                   </div>
                   <Button variant="ghost" size="sm" className="text-[10px] h-7 px-2 shrink-0 rounded-lg" onClick={() => swapQuestion(idx)}>
@@ -375,14 +367,14 @@ const Admin = () => {
       )}
 
       {/* Quick links */}
-      <div className="flex gap-2 mb-5">
-        <Link to="/questions" className="flex-1">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full rounded-xl h-11">
+      <div className="grid grid-cols-2 gap-2 mb-5">
+        <Link to="/questions">
+          <Button variant="outline" size="sm" className="gap-1.5 text-[10px] w-full rounded-xl h-12">
             <BookOpen className="w-3.5 h-3.5" /> Question Bank
           </Button>
         </Link>
-        <Link to="/import" className="flex-1">
-          <Button variant="outline" size="sm" className="gap-1.5 text-xs w-full rounded-xl h-11">
+        <Link to="/import">
+          <Button variant="outline" size="sm" className="gap-1.5 text-[10px] w-full rounded-xl h-12">
             <Upload className="w-3.5 h-3.5" /> Import Questions
           </Button>
         </Link>
@@ -399,26 +391,26 @@ const Admin = () => {
           {sessions.map((s, i) => (
             <Card
               key={s.id}
-              className="card-interactive rounded-2xl animate-fade-up border-0 shadow-sm"
+              className="card-interactive rounded-2xl animate-fade-up border-0 shadow-sm active:scale-[0.98] transition-transform"
               style={{ animationDelay: `${i * 50}ms`, animationFillMode: "both" }}
               onClick={() => setSelectedSession(s)}
             >
-              <CardContent className="flex items-center justify-between py-4 px-5">
-                <div>
-                  <p className="font-bold text-base tracking-wide font-display">{s.name || s.session_code}</p>
-                  <p className="text-[11px] text-muted-foreground/60 flex items-center gap-1.5 mt-1">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {s.question_ids.length} Qs · <span className="font-mono text-[10px]">{s.session_code}</span>
-                  </p>
+              <CardContent className="py-4 px-4">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <p className="font-bold text-sm tracking-wide font-display flex-1 min-w-0 truncate">{s.name || s.session_code}</p>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); copyLink(s.session_code); }} className="gap-1 text-[10px] h-8 px-2.5 rounded-lg">
+                      <Copy className="w-3 h-3" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={(e) => deleteSession(s.id, e)} className="h-8 w-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); copyLink(s.session_code); }} className="gap-1.5 text-xs h-9 rounded-xl">
-                    <Copy className="w-3 h-3" /> Copy
-                  </Button>
-                  <Button variant="ghost" size="icon" onClick={(e) => deleteSession(s.id, e)} className="h-9 w-9 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </Button>
-                </div>
+                <p className="text-[10px] text-muted-foreground/60 flex items-center gap-1.5">
+                  <Calendar className="w-3 h-3" />
+                  {new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {s.question_ids.length} Qs · <span className="font-mono">{s.session_code}</span>
+                </p>
               </CardContent>
             </Card>
           ))}
