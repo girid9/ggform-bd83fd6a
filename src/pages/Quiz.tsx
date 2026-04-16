@@ -447,6 +447,10 @@ const Quiz = () => {
             <div className="text-xl font-bold uppercase mb-4">{score} / {questions.length} CORRECT</div>
         </div>
 
+        <div>
+          <Leaderboard sessionId={sessionId} />
+        </div>
+
         <div className="mt-12">
           <h3 className="text-lg font-black font-display mb-6 border-b-2 border-foreground pb-2 uppercase">Analysis</h3>
           <div className="space-y-4">
