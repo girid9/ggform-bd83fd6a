@@ -50,9 +50,10 @@ const Quiz = () => {
 
   const [showTestConfirmation, setShowTestConfirmation] = useState(false);
 
+  // Keep topic-wise order for quiz too (no random shuffle of question order)
   const shuffledQuestions = useMemo(() => {
     if (phase !== "quiz") return [];
-    return shuffleArray([...questions]);
+    return [...questions]; // maintain topic-wise order
   }, [questions, phase]);
 
   const shuffledOptions = useMemo(() => {
