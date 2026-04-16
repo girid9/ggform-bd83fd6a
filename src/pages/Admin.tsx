@@ -22,6 +22,7 @@ interface QuizSession {
   session_code: string;
   created_at: string;
   question_ids: string[];
+  name: string;
 }
 
 interface QuizAttempt {
