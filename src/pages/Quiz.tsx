@@ -97,7 +97,11 @@ const Quiz = () => {
       .from("quiz_questions")
       .select("*")
       .in("id", session.question_ids);
-    if (qs) setQuestions(qs);
+    if (qs) {
+      // Sort questions by topic for topic-wise display
+      const sorted = [...qs].sort((a, b) => a.topic.localeCompare(b.topic));
+      setQuestions(sorted);
+    }
     setLoading(false);
   };
 
