@@ -38,7 +38,6 @@ const Quiz = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  // Tracking answers
   const [studyAnswers, setStudyAnswers] = useState<Record<string, string>>({});
   const [answers, setAnswers] = useState<Record<string, string>>({});
   
@@ -51,10 +50,9 @@ const Quiz = () => {
   const [showTestConfirmation, setShowTestConfirmation] = useState(false);
   const [showStudyReview, setShowStudyReview] = useState(false);
 
-  // Keep topic-wise order for quiz too (no random shuffle of question order)
   const shuffledQuestions = useMemo(() => {
     if (phase !== "quiz") return [];
-    return [...questions]; // maintain topic-wise order
+    return [...questions];
   }, [questions, phase]);
 
   const shuffledOptions = useMemo(() => {
@@ -100,7 +98,6 @@ const Quiz = () => {
       .select("*")
       .in("id", session.question_ids);
     if (qs) {
-      // Sort questions by topic for topic-wise display
       const sorted = [...qs].sort((a, b) => a.topic.localeCompare(b.topic));
       setQuestions(sorted);
     }
@@ -117,7 +114,7 @@ const Quiz = () => {
   };
 
   const selectStudyAnswer = (questionId: string, originalKey: string) => {
-    if (studyAnswers[questionId]) return; // already guessed
+    if (studyAnswers[questionId]) return;
     setStudyAnswers((prev) => ({ ...prev, [questionId]: originalKey }));
   };
 
@@ -187,15 +184,15 @@ const Quiz = () => {
   /* ─── NAME PHASE ─── */
   if (phase === "name") {
     return (
-      <div className="flex min-h-screen items-center justify-center px-6 relative page-bg">
-        <div className="absolute top-6 right-6 z-50"><DarkModeToggle /></div>
+      <div className="flex min-h-screen items-center justify-center px-5 relative page-bg">
+        <div className="absolute top-4 right-4 z-50"><DarkModeToggle /></div>
         
         <div className="w-full max-w-sm animate-slide-up-subtle space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-extrabold font-display uppercase tracking-wider border-b-4 border-foreground pb-2 inline-block">Start</h1>
           </div>
 
-          <div className="p-8 border-4 border-foreground bg-card shadow-[8px_8px_0_0_rgba(0,0,0,1)] dark:shadow-[8px_8px_0_0_rgba(255,255,255,1)]">
+          <div className="p-6 sm:p-8 border-4 border-foreground bg-card shadow-[8px_8px_0_0_rgba(0,0,0,1)] dark:shadow-[8px_8px_0_0_rgba(255,255,255,1)]">
             <form onSubmit={handleNameSubmit} className="space-y-6">
               <FloatingInput 
                 label="Full Name" 
@@ -218,15 +215,15 @@ const Quiz = () => {
   if (phase === "study") {
     if (showTestConfirmation) {
       return (
-        <div className="flex min-h-screen items-center justify-center px-6 relative page-bg">
-          <div className="absolute top-6 right-6 z-50"><DarkModeToggle /></div>
+        <div className="flex min-h-screen items-center justify-center px-5 relative page-bg">
+          <div className="absolute top-4 right-4 z-50"><DarkModeToggle /></div>
           
-          <div className="w-full max-w-md animate-slide-up-subtle text-center space-y-8">
-             <h1 className="text-4xl font-extrabold font-display uppercase border-b-4 border-foreground pb-4 border-dashed">Are you sure bro?</h1>
-             <p className="text-lg font-bold border-2 p-4 bg-card text-foreground">You are about to start the test. Your performance will be recorded.</p>
-             <div className="flex gap-4">
-                <Button className="flex-1 h-14 btn-secondary text-lg border-2" onClick={() => setShowTestConfirmation(false)}>Wait, go back</Button>
-                <Button className="flex-1 h-14 btn-primary text-lg" onClick={() => { setShowTestConfirmation(false); setPhase("quiz"); }}>Yes, begin test</Button>
+          <div className="w-full max-w-md animate-slide-up-subtle text-center space-y-6">
+             <h1 className="text-3xl sm:text-4xl font-extrabold font-display uppercase border-b-4 border-foreground pb-4 border-dashed">Are you sure bro?</h1>
+             <p className="text-base sm:text-lg font-bold border-2 p-4 bg-card text-foreground">You are about to start the test. Your performance will be recorded.</p>
+             <div className="flex flex-col sm:flex-row gap-3">
+                <Button className="flex-1 h-14 btn-secondary text-base border-2" onClick={() => setShowTestConfirmation(false)}>Wait, go back</Button>
+                <Button className="flex-1 h-14 btn-primary text-base" onClick={() => { setShowTestConfirmation(false); setPhase("quiz"); }}>Yes, begin test</Button>
              </div>
           </div>
         </div>
@@ -238,41 +235,41 @@ const Quiz = () => {
       const correctCount = questions.filter(q => studyAnswers[q.id] === q.correct_answer).length;
 
       return (
-        <div className="flex flex-col min-h-screen px-6 py-12 max-w-2xl mx-auto page-bg">
-          <div className="fixed top-6 right-6 z-50"><DarkModeToggle /></div>
+        <div className="flex flex-col min-h-screen px-4 sm:px-6 py-8 pb-32 max-w-2xl mx-auto page-bg">
+          <div className="fixed top-4 right-4 z-50"><DarkModeToggle /></div>
 
-          <div className="animate-slide-up-subtle space-y-8">
+          <div className="animate-slide-up-subtle space-y-6">
             <div className="border-b-2 border-border pb-4">
-              <span className="chip-primary mb-4 inline-flex">
+              <span className="chip-primary mb-3 inline-flex">
                 <BookOpen className="w-4 h-4" /> REVIEW
               </span>
-              <h1 className="text-2xl font-extrabold font-display uppercase">Your Results</h1>
+              <h1 className="text-xl sm:text-2xl font-extrabold font-display uppercase">Your Results</h1>
               <p className="text-sm font-bold text-primary mt-2 uppercase tracking-wider">
                 {correctCount} / {questions.length} correct during practice
               </p>
             </div>
 
             {wrongQuestions.length === 0 ? (
-              <div className="p-8 border-2 border-foreground text-center bg-card">
+              <div className="p-6 border-2 border-foreground text-center bg-card">
                 <CheckCircle2 className="w-12 h-12 mx-auto mb-4 text-primary" />
                 <p className="text-xl font-black font-display uppercase">Perfect!</p>
                 <p className="text-sm text-muted-foreground mt-2">You got everything right in practice.</p>
               </div>
             ) : (
               <>
-                <h3 className="text-lg font-black font-display uppercase border-b-2 border-foreground pb-2">
+                <h3 className="text-base font-black font-display uppercase border-b-2 border-foreground pb-2">
                   What You Got Wrong ({wrongQuestions.length})
                 </h3>
                 <div className="space-y-4">
                   {wrongQuestions.map((q, idx) => {
                     const studentAnswer = studyAnswers[q.id];
                     return (
-                      <div key={q.id} className="border-2 border-foreground p-6 rounded-lg bg-card">
-                        <p className="text-base font-bold leading-tight mb-1">
+                      <div key={q.id} className="border-2 border-foreground p-4 sm:p-6 rounded-lg bg-card">
+                        <p className="text-sm sm:text-base font-bold leading-tight mb-1">
                           <span className="mr-2 font-mono">{idx + 1}.</span>{q.question}
                         </p>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-4">{q.topic}</p>
-                        <div className="grid gap-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-3">{q.topic}</p>
+                        <div className="grid gap-2">
                           {(["A", "B", "C", "D"] as const).map((key) => {
                             const text = q[`option_${key.toLowerCase()}` as keyof Question] as string;
                             const isCorrect = q.correct_answer === key;
@@ -281,7 +278,7 @@ const Quiz = () => {
                             if (isCorrect) cls = "border-foreground bg-foreground text-background font-bold";
                             else if (isStudentPick) cls = "border-foreground border-dashed text-foreground";
                             return (
-                              <div key={key} className={`rounded-lg p-4 text-sm border-2 ${cls}`}>
+                              <div key={key} className={`rounded-lg p-3 text-sm border-2 ${cls}`}>
                                 <span className="mr-2 font-mono font-bold">{key}.</span>{text}
                                 {isCorrect && <CheckCircle2 className="w-4 h-4 inline ml-2 -mt-0.5" />}
                                 {isStudentPick && !isCorrect && <XCircle className="w-4 h-4 inline ml-2 -mt-0.5 opacity-70" />}
@@ -295,11 +292,14 @@ const Quiz = () => {
                 </div>
               </>
             )}
+          </div>
 
-            <div className="flex gap-4 pt-4">
+          {/* Fixed bottom buttons */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+            <div className="flex gap-3 max-w-2xl mx-auto">
               <Button
                 size="lg"
-                className="flex-1 h-16 btn-secondary text-lg border-2"
+                className="flex-1 h-14 btn-secondary text-sm border-2"
                 onClick={() => {
                   setShowStudyReview(false);
                   setStudyAnswers({});
@@ -310,7 +310,7 @@ const Quiz = () => {
               </Button>
               <Button
                 size="lg"
-                className="flex-1 h-16 btn-primary text-lg"
+                className="flex-1 h-14 btn-primary text-sm"
                 onClick={() => {
                   setShowStudyReview(false);
                   setShowTestConfirmation(true);
@@ -330,29 +330,29 @@ const Quiz = () => {
     const hasGuessed = !!studyAnswers[q.id];
 
     return (
-      <div className="flex flex-col min-h-screen px-6 py-12 max-w-2xl mx-auto page-bg">
-        <div className="fixed top-6 right-6 z-50"><DarkModeToggle /></div>
+      <div className="flex flex-col min-h-screen px-4 sm:px-6 py-8 pb-28 max-w-2xl mx-auto page-bg">
+        <div className="fixed top-4 right-4 z-50"><DarkModeToggle /></div>
 
-        <div className="text-left mb-8 animate-slide-up-subtle border-b-2 border-border pb-4">
-          <span className="chip-primary mb-4 inline-flex">
+        <div className="text-left mb-6 animate-slide-up-subtle border-b-2 border-border pb-3">
+          <span className="chip-primary mb-3 inline-flex">
             <BookOpen className="w-4 h-4" /> MEMORIZE
           </span>
-          <h1 className="text-2xl font-extrabold font-display">Guess the Answer</h1>
-          <p className="text-sm font-bold text-primary mt-2 uppercase tracking-wider">{q.topic}</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold font-display">Guess the Answer</h1>
+          <p className="text-xs sm:text-sm font-bold text-primary mt-1 uppercase tracking-wider">{q.topic}</p>
         </div>
 
         <div className="flex-1">
-          <div key={q.id} className="animate-slide-up-subtle bg-card rounded-lg border-2 border-border p-6 shadow-sm">
-            <div className="flex items-start gap-4 mb-4">
+          <div key={q.id} className="animate-slide-up-subtle bg-card rounded-lg border-2 border-border p-4 sm:p-6 shadow-sm">
+            <div className="flex items-start gap-3 mb-4">
               <div className="question-counter flex-shrink-0">
                 {currentStudyIndex + 1} / {questions.length}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-base font-semibold leading-relaxed mb-1">{q.question}</p>
+                <p className="text-sm sm:text-base font-semibold leading-relaxed mb-1">{q.question}</p>
                 <p className="text-[10px] font-bold uppercase tracking-[0.2em]">{q.topic}</p>
               </div>
             </div>
-            <div className="grid gap-3">
+            <div className="grid gap-2.5">
               {opts.map((opt) => {
                 const isCorrect = q.correct_answer === opt.originalKey;
                 const isGuessed = studyAnswers[q.id] === opt.originalKey;
@@ -373,18 +373,18 @@ const Quiz = () => {
                     key={opt.originalKey}
                     onClick={() => selectStudyAnswer(q.id, opt.originalKey)}
                     disabled={hasGuessed}
-                    className={`group relative flex items-center gap-4 w-full text-left rounded-lg p-5 border-2 transition-all duration-200 ${cls}`}
+                    className={`group relative flex items-center gap-3 w-full text-left rounded-lg p-4 border-2 transition-all duration-200 min-h-[48px] ${cls}`}
                   >
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded font-mono font-bold transition-all border-2 flex-col
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded font-mono font-bold text-sm transition-all border-2
                       ${hasGuessed && isCorrect ? "bg-background text-foreground border-transparent" : "bg-muted text-muted-foreground border-border"}
                     `}>
                       {opt.label}
                     </div>
-                    <span className="text-[15px] font-medium transition-colors flex-1">
+                    <span className="text-sm font-medium transition-colors flex-1">
                       {opt.text}
                     </span>
-                    {hasGuessed && isCorrect && <CheckCircle2 className="w-5 h-5 ml-auto text-background" />}
-                    {hasGuessed && isGuessed && !isCorrect && <XCircle className="w-5 h-5 ml-auto text-foreground opacity-60" />}
+                    {hasGuessed && isCorrect && <CheckCircle2 className="w-5 h-5 ml-auto text-background shrink-0" />}
+                    {hasGuessed && isGuessed && !isCorrect && <XCircle className="w-5 h-5 ml-auto text-foreground opacity-60 shrink-0" />}
                   </button>
                 );
               })}
@@ -392,37 +392,39 @@ const Quiz = () => {
           </div>
         </div>
 
-        <div className="pt-8 flex gap-4">
-          <Button
-            size="lg"
-            variant="outline"
-            className="flex-1 h-16 btn-secondary text-lg border-2 border-border"
-            onClick={() => setCurrentStudyIndex(p => Math.max(0, p - 1))}
-            disabled={currentStudyIndex === 0}
-          >
-            PREV
-          </Button>
+        {/* Fixed bottom nav */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+          <div className="flex gap-3 max-w-2xl mx-auto">
+            <Button
+              size="lg"
+              className="flex-1 h-14 btn-secondary text-sm border-2 border-border"
+              onClick={() => setCurrentStudyIndex(p => Math.max(0, p - 1))}
+              disabled={currentStudyIndex === 0}
+            >
+              PREV
+            </Button>
 
-          {currentStudyIndex < questions.length - 1 ? (
-             <Button
-                size="lg"
-                className="flex-1 h-16 btn-primary text-lg"
-                onClick={() => setCurrentStudyIndex(p => Math.min(questions.length - 1, p + 1))}
-                disabled={!hasGuessed}
-             >
-                NEXT
-             </Button>
-          ) : (
-             <Button
-               size="lg"
-               className="flex-1 h-16 btn-primary text-lg"
-               onClick={() => setShowStudyReview(true)}
-               disabled={!hasGuessed}
-             >
-               REVIEW
-             </Button>
-           )}
-         </div>
+            {currentStudyIndex < questions.length - 1 ? (
+               <Button
+                  size="lg"
+                  className="flex-1 h-14 btn-primary text-sm"
+                  onClick={() => setCurrentStudyIndex(p => Math.min(questions.length - 1, p + 1))}
+                  disabled={!hasGuessed}
+               >
+                  NEXT
+               </Button>
+            ) : (
+               <Button
+                 size="lg"
+                 className="flex-1 h-14 btn-primary text-sm"
+                 onClick={() => setShowStudyReview(true)}
+                 disabled={!hasGuessed}
+               >
+                 REVIEW
+               </Button>
+             )}
+          </div>
+        </div>
       </div>
     );
   }
@@ -435,14 +437,14 @@ const Quiz = () => {
     const isAnswered = !!answers[q.id];
 
     return (
-      <div className="flex flex-col min-h-screen px-6 py-8 max-w-2xl mx-auto page-bg">
-        <div className="fixed top-6 right-6 z-50"><DarkModeToggle /></div>
+      <div className="flex flex-col min-h-screen px-4 sm:px-6 py-6 pb-36 max-w-2xl mx-auto page-bg">
+        <div className="fixed top-4 right-4 z-50"><DarkModeToggle /></div>
 
-        <header className="mb-8 border-b-2 border-border pb-4">
+        <header className="mb-6 border-b-2 border-border pb-3">
           <div className="flex items-center justify-between">
              <div className="space-y-0.5">
-                <h1 className="text-2xl font-black font-display tracking-tight uppercase">Quiz</h1>
-                <p className="text-sm font-bold text-primary uppercase tracking-wider">{q.topic}</p>
+                <h1 className="text-xl sm:text-2xl font-black font-display tracking-tight uppercase">Quiz</h1>
+                <p className="text-xs sm:text-sm font-bold text-primary uppercase tracking-wider">{q.topic}</p>
              </div>
              <div className="question-counter">
                 {currentQuizIndex + 1} / {questions.length}
@@ -451,29 +453,29 @@ const Quiz = () => {
         </header>
 
         <div className="flex-1">
-          <div key={q.id} className="animate-slide-up-subtle bg-card rounded-lg border-2 border-border p-6 shadow-sm">
-            <div className="flex items-start gap-4 mb-6">
-              <p className="text-lg font-bold leading-snug flex-1">{q.question}</p>
+          <div key={q.id} className="animate-slide-up-subtle bg-card rounded-lg border-2 border-border p-4 sm:p-6 shadow-sm">
+            <div className="flex items-start gap-3 mb-5">
+              <p className="text-base sm:text-lg font-bold leading-snug flex-1">{q.question}</p>
             </div>
-            <div className="grid gap-4">
+            <div className="grid gap-3">
               {opts.map((opt) => {
                 const selected = answers[q.id] === opt.originalKey;
                 return (
                   <button
                     key={opt.originalKey}
                     onClick={() => selectAnswer(q.id, opt.originalKey)}
-                    className={`group relative flex items-center gap-4 w-full text-left rounded-lg p-5 border-2 transition-all duration-200 ${
+                    className={`group relative flex items-center gap-3 w-full text-left rounded-lg p-4 border-2 transition-all duration-200 min-h-[48px] ${
                       selected
                         ? "border-foreground bg-foreground text-background"
                         : "border-border hover:border-foreground hover:bg-muted"
                     }`}
                   >
-                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded font-mono font-bold transition-all border-2 ${
+                    <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded font-mono font-bold text-sm transition-all border-2 ${
                       selected ? "bg-background text-foreground border-transparent" : "bg-muted text-muted-foreground border-border group-hover:border-foreground"
                     }`}>
                       {opt.label}
                     </div>
-                    <span className={`text-[15px] font-medium transition-colors ${selected ? "font-bold" : ""}`}>
+                    <span className={`text-sm font-medium transition-colors ${selected ? "font-bold" : ""}`}>
                       {opt.text}
                     </span>
                   </button>
@@ -483,39 +485,42 @@ const Quiz = () => {
           </div>
         </div>
 
-        <div className="pt-8 flex flex-col gap-4">
-            <div className="flex gap-4">
+        {/* Fixed bottom nav */}
+        <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border z-40" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+          <div className="max-w-2xl mx-auto space-y-3">
+            <div className="flex gap-3">
               <Button
                 size="lg"
-                className="flex-1 h-14 btn-secondary text-lg border-2"
+                className="flex-1 h-12 btn-secondary text-sm border-2"
                 onClick={() => setCurrentQuizIndex(p => Math.max(0, p - 1))}
                 disabled={currentQuizIndex === 0}
               >
-                <ArrowLeft className="w-5 h-5 mr-2" /> PREV
+                <ArrowLeft className="w-4 h-4 mr-1" /> PREV
               </Button>
               {currentQuizIndex < questions.length - 1 && (
                 <Button
                   size="lg"
-                  className="flex-1 h-14 btn-secondary text-lg border-2"
+                  className="flex-1 h-12 btn-secondary text-sm border-2"
                   onClick={() => setCurrentQuizIndex(p => Math.min(questions.length - 1, p + 1))}
                 >
-                  NEXT <ArrowRight className="w-5 h-5 ml-2" />
+                  NEXT <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               )}
             </div>
 
             <Button
               size="lg"
-              className="w-full h-16 btn-primary text-lg"
+              className="w-full h-14 btn-primary text-sm"
               onClick={submitQuiz}
               disabled={submitting}
             >
               {submitting ? (
                 <><Loader2 className="w-5 h-5 animate-spin mr-3" /> ...</>
               ) : (
-                <>SUBMIT</>
+                <>SUBMIT ({Object.keys(answers).length}/{questions.length})</>
               )}
             </Button>
+          </div>
         </div>
       </div>
     );
@@ -525,26 +530,26 @@ const Quiz = () => {
   const percentage = Math.round((score / questions.length) * 100);
 
   return (
-    <div className="min-h-screen px-6 py-12 max-w-2xl mx-auto page-bg">
-      <div className="fixed top-6 right-6 z-50"><DarkModeToggle /></div>
+    <div className="min-h-screen px-4 sm:px-6 py-8 pb-24 max-w-2xl mx-auto page-bg">
+      <div className="fixed top-4 right-4 z-50"><DarkModeToggle /></div>
 
-      <div className="space-y-8 animate-slide-up-subtle">
+      <div className="space-y-6 animate-slide-up-subtle">
         <header className="border-b-4 border-foreground pb-4">
-            <h1 className="text-4xl font-black font-display tracking-tight uppercase">Outcome</h1>
+            <h1 className="text-3xl sm:text-4xl font-black font-display tracking-tight uppercase">Outcome</h1>
             <p className="text-sm font-mono tracking-widest uppercase mt-2">ID: {studentName}</p>
         </header>
 
-        <div className="p-8 border-4 border-foreground text-center">
-            <div className="text-8xl font-black font-mono mb-4">{percentage}%</div>
-            <div className="text-xl font-bold uppercase mb-4">{score} / {questions.length} CORRECT</div>
+        <div className="p-6 sm:p-8 border-4 border-foreground text-center">
+            <div className="text-6xl sm:text-8xl font-black font-mono mb-4">{percentage}%</div>
+            <div className="text-lg sm:text-xl font-bold uppercase mb-4">{score} / {questions.length} CORRECT</div>
         </div>
 
         <div>
           <Leaderboard sessionId={sessionId} />
         </div>
 
-        <div className="mt-12">
-          <h3 className="text-lg font-black font-display mb-6 border-b-2 border-foreground pb-2 uppercase">Analysis</h3>
+        <div>
+          <h3 className="text-base sm:text-lg font-black font-display mb-5 border-b-2 border-foreground pb-2 uppercase">Analysis</h3>
           <div className="space-y-4">
             {questions.map((q, idx) => {
               const studentAnswer = answers[q.id];
@@ -552,15 +557,15 @@ const Quiz = () => {
               return (
                 <div
                   key={q.id}
-                  className={`border-2 p-6 rounded-lg ${isCorrect ? "border-muted-foreground" : "border-foreground"}`}
+                  className={`border-2 p-4 sm:p-6 rounded-lg ${isCorrect ? "border-muted-foreground" : "border-foreground"}`}
                 >
-                  <div className="flex flex-col gap-4 mb-4">
-                    <p className="text-base font-bold leading-tight"><span className="mr-2 font-mono">{idx + 1}.</span> {q.question}</p>
-                    <div className="font-mono text-sm uppercase font-bold text-muted-foreground">
+                  <div className="flex flex-col gap-2 mb-3">
+                    <p className="text-sm sm:text-base font-bold leading-tight"><span className="mr-2 font-mono">{idx + 1}.</span> {q.question}</p>
+                    <div className="font-mono text-xs uppercase font-bold text-muted-foreground">
                         [{isCorrect ? "PASS" : "FAIL"}]
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 gap-2">
                     {(["A", "B", "C", "D"] as const).map((key) => {
                       const text = q[`option_${key.toLowerCase()}` as keyof Question] as string;
                       const isThisCorrect = q.correct_answer === key;
@@ -583,8 +588,8 @@ const Quiz = () => {
           </div>
         </div>
 
-        <div className="pt-8">
-           <Button className="w-full h-14 btn-primary" onClick={() => window.location.reload()}>
+        <div className="pt-4">
+           <Button className="w-full h-14 btn-primary text-sm" onClick={() => window.location.reload()}>
               RESTART
            </Button>
         </div>

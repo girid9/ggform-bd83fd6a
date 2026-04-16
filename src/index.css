@@ -184,6 +184,22 @@
     box-shadow: 0 6px 28px -4px hsl(262 83% 58% / 0.6);
   }
 
+  .indigo .btn-secondary {
+    background: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+    border-color: hsl(var(--border));
+  }
+
+  .indigo .btn-secondary:hover {
+    background: hsl(var(--accent));
+    border-color: hsl(var(--ring));
+  }
+
+  /* Indigo name card shadow */
+  .indigo .shadow-\[8px_8px_0_0_rgba\(0\2c 0\2c 0\2c 1\)\] {
+    box-shadow: 8px 8px 0 0 hsl(262 83% 58% / 0.4);
+  }
+
   .question-counter {
     @apply inline-flex items-center justify-center h-8 px-3 rounded-sm bg-muted border border-border font-display text-sm font-bold tabular-nums;
   }
