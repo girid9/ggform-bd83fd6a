@@ -49,6 +49,7 @@ const Quiz = () => {
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
 
   const [showTestConfirmation, setShowTestConfirmation] = useState(false);
+  const [showStudyReview, setShowStudyReview] = useState(false);
 
   // Keep topic-wise order for quiz too (no random shuffle of question order)
   const shuffledQuestions = useMemo(() => {
