@@ -422,6 +422,26 @@ const Quiz = () => {
                 );
               })}
             </div>
+
+            {/* AI Socratic Hint */}
+            {hasGuessed && studyAnswers[q.id] !== q.correct_answer && (
+              <div className="mt-4 rounded-lg border-2 border-primary/30 bg-primary/5 p-4 animate-slide-up-subtle">
+                <div className="flex items-start gap-2.5">
+                  <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary mb-1.5">Why am I wrong?</p>
+                    {aiHintLoading[q.id] ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Analyzing your answer...</span>
+                      </div>
+                    ) : aiHints[q.id] ? (
+                      <p className="text-sm leading-relaxed text-foreground/90">{aiHints[q.id]}</p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
