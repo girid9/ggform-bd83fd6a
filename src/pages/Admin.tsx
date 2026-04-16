@@ -279,51 +279,41 @@ const Admin = () => {
       {/* Create Quiz */}
       <Card className="mb-5 rounded-2xl border-0 shadow-sm">
         <CardContent className="py-5 px-5">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-bold font-display">Create Quiz</p>
-            <div className="flex gap-1 bg-secondary rounded-xl p-0.5">
-              <button
-                className={`text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all ${quizMode === "random" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setQuizMode("random")}
-              >
-                Random
-              </button>
-              <button
-                className={`text-[11px] px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1 ${quizMode === "topic" ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
-                onClick={() => setQuizMode("topic")}
-              >
-                <Filter className="w-3 h-3" /> Topic
-              </button>
-            </div>
-          </div>
+          <p className="text-sm font-bold font-display mb-4">Create Quiz</p>
 
-          {quizMode === "topic" && (
-            <Select value={selectedTopic} onValueChange={setSelectedTopic}>
-              <SelectTrigger className="w-full h-10 text-xs mb-3 rounded-xl">
-                <SelectValue placeholder="Select topic" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All topics</SelectItem>
-                {topics.map((t) => (<SelectItem key={t.topic} value={t.topic}>{t.topic} ({t.count})</SelectItem>))}
-              </SelectContent>
-            </Select>
-          )}
+          <p className="text-[11px] font-medium text-muted-foreground mb-2 uppercase tracking-wider">Select Topics</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {topics.map((t) => {
+              const isSelected = selectedTopics.includes(t.topic);
+              return (
+                <button
+                  key={t.topic}
+                  onClick={() => setSelectedTopics(prev => isSelected ? prev.filter(x => x !== t.topic) : [...prev, t.topic])}
+                  className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all border ${
+                    isSelected
+                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      : "bg-secondary text-muted-foreground border-border hover:border-foreground hover:text-foreground"
+                  }`}
+                >
+                  {t.topic} ({t.count})
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[10px] text-muted-foreground mb-3">
+            {selectedTopics.length === 0 
+              ? `All topics selected · ${topics.reduce((s, t) => s + t.count, 0)} questions`
+              : `${selectedTopics.length} topic${selectedTopics.length > 1 ? 's' : ''} · ${topics.filter(t => selectedTopics.includes(t.topic)).reduce((s, t) => s + t.count, 0)} questions`
+            }
+          </p>
 
           <div className="flex items-center gap-2">
-            <Select value={quizSize} onValueChange={setQuizSize}>
-              <SelectTrigger className="w-28 h-10 text-xs rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[10, 15, 20, 25, 30, 40, 50].map((n) => (<SelectItem key={n} value={String(n)}>{n} questions</SelectItem>))}
-              </SelectContent>
-            </Select>
             <Button onClick={generatePreview} disabled={creating} size="sm" className="gap-1.5 font-semibold flex-1 btn-primary h-10 text-xs">
               {creating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Eye className="w-3.5 h-3.5" />}
               Preview & Create
             </Button>
             <Button onClick={createQuizDirect} disabled={creating} variant="outline" size="sm" className="gap-1 text-xs h-10 rounded-xl">
-              <Plus className="w-3.5 h-3.5" /> Quick
+              <Plus className="w-3.5 h-3.5" /> Quick Create
             </Button>
           </div>
         </CardContent>
