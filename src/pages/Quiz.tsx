@@ -246,6 +246,7 @@ const Quiz = () => {
             <BookOpen className="w-4 h-4" /> MEMORIZE
           </span>
           <h1 className="text-2xl font-extrabold font-display">Guess the Answer</h1>
+          <p className="text-sm font-bold text-primary mt-2 uppercase tracking-wider">{q.topic}</p>
         </div>
 
         <div className="flex-1">
@@ -349,6 +350,7 @@ const Quiz = () => {
           <div className="flex items-center justify-between">
              <div className="space-y-0.5">
                 <h1 className="text-2xl font-black font-display tracking-tight uppercase">Quiz</h1>
+                <p className="text-sm font-bold text-primary uppercase tracking-wider">{q.topic}</p>
              </div>
              <div className="question-counter">
                 {currentQuizIndex + 1} / {questions.length}
