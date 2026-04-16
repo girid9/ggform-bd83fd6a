@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { shuffleArray } from "@/lib/shuffle";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { BookOpen, CheckCircle2, XCircle, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { BookOpen, CheckCircle2, XCircle, ArrowRight, ArrowLeft, Loader2, Lightbulb } from "lucide-react";
 import { FloatingInput } from "@/components/FloatingInput";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 import Leaderboard from "@/components/Leaderboard";
@@ -49,6 +49,35 @@ const Quiz = () => {
 
   const [showTestConfirmation, setShowTestConfirmation] = useState(false);
   const [showStudyReview, setShowStudyReview] = useState(false);
+
+  const [aiHints, setAiHints] = useState<Record<string, string>>({});
+  const [aiHintLoading, setAiHintLoading] = useState<Record<string, boolean>>({});
+
+  const fetchAiHint = async (q: Question, studentAnswer: string) => {
+    if (aiHints[q.id] || aiHintLoading[q.id]) return;
+    setAiHintLoading(prev => ({ ...prev, [q.id]: true }));
+    try {
+      const correctText = q[`option_${q.correct_answer.toLowerCase()}` as keyof Question] as string;
+      const studentText = q[`option_${studentAnswer.toLowerCase()}` as keyof Question] as string;
+      const { data, error } = await supabase.functions.invoke("socratic-hint", {
+        body: {
+          question: q.question,
+          correctAnswer: q.correct_answer,
+          correctText,
+          studentAnswer,
+          studentText,
+          topic: q.topic,
+        },
+      });
+      if (error) throw error;
+      setAiHints(prev => ({ ...prev, [q.id]: data.hint }));
+    } catch (e) {
+      console.error("AI hint error:", e);
+      setAiHints(prev => ({ ...prev, [q.id]: "Could not load hint. Try again later." }));
+    } finally {
+      setAiHintLoading(prev => ({ ...prev, [q.id]: false }));
+    }
+  };
 
   const shuffledQuestions = useMemo(() => {
     if (phase !== "quiz") return [];
@@ -116,6 +145,10 @@ const Quiz = () => {
   const selectStudyAnswer = (questionId: string, originalKey: string) => {
     if (studyAnswers[questionId]) return;
     setStudyAnswers((prev) => ({ ...prev, [questionId]: originalKey }));
+    const q = questions.find(qq => qq.id === questionId);
+    if (q && originalKey !== q.correct_answer) {
+      fetchAiHint(q, originalKey);
+    }
   };
 
   const selectAnswer = (questionId: string, originalKey: string) => {
@@ -389,7 +422,36 @@ const Quiz = () => {
                 );
               })}
             </div>
-          </div>
+
+            {/* AI Socratic Hint */}
+            {hasGuessed && studyAnswers[q.id] !== q.correct_answer && (
+              <div className="mt-4 rounded-lg border-2 border-primary/30 bg-primary/5 p-4 animate-slide-up-subtle">
+                <div className="flex items-start gap-2.5">
+                  <Lightbulb className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary mb-1.5">Why am I wrong?</p>
+                    {aiHintLoading[q.id] ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Analyzing your answer...</span>
+                      </div>
+                    ) : aiHints[q.id] ? (
+                      <p className="text-sm leading-relaxed text-foreground/90">{aiHints[q.id]}</p>
+                    ) : null}
+                  </div>
+                </div>
+                          </div>
+                        )}
+                        {/* AI hint in review */}
+                        {aiHints[q.id] && (
+                          <div className="mt-3 rounded-lg border-2 border-primary/30 bg-primary/5 p-3">
+                            <div className="flex items-start gap-2">
+                              <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                              <p className="text-xs leading-relaxed text-foreground/90">{aiHints[q.id]}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
         </div>
 
         {/* Fixed bottom nav */}
