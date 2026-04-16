@@ -405,10 +405,10 @@ const Admin = () => {
             >
               <CardContent className="flex items-center justify-between py-4 px-5">
                 <div>
-                  <p className="font-bold text-base tracking-wide font-display">{s.session_code}</p>
+                  <p className="font-bold text-base tracking-wide font-display">{s.name || s.session_code}</p>
                   <p className="text-[11px] text-muted-foreground/60 flex items-center gap-1.5 mt-1">
                     <Calendar className="w-3 h-3" />
-                    {new Date(s.created_at).toLocaleDateString()} · {s.question_ids.length} Qs
+                    {new Date(s.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {s.question_ids.length} Qs · <span className="font-mono text-[10px]">{s.session_code}</span>
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
