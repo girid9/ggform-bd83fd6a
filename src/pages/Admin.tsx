@@ -216,10 +216,10 @@ const Admin = () => {
 
         <div className="flex items-start justify-between gap-3 mb-5 animate-fade-up">
           <div>
-            <h2 className="text-lg font-bold font-display tracking-wide">{selectedSession.session_code}</h2>
+            <h2 className="text-lg font-bold font-display tracking-wide">{selectedSession.name || selectedSession.session_code}</h2>
             <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
               <Calendar className="w-3 h-3" />
-              {new Date(selectedSession.created_at).toLocaleDateString()} · {selectedSession.question_ids.length} Qs
+              {new Date(selectedSession.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} · {selectedSession.question_ids.length} Qs · <span className="font-mono">{selectedSession.session_code}</span>
             </p>
           </div>
         </div>
