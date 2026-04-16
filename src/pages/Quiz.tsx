@@ -145,6 +145,10 @@ const Quiz = () => {
   const selectStudyAnswer = (questionId: string, originalKey: string) => {
     if (studyAnswers[questionId]) return;
     setStudyAnswers((prev) => ({ ...prev, [questionId]: originalKey }));
+    const q = questions.find(qq => qq.id === questionId);
+    if (q && originalKey !== q.correct_answer) {
+      fetchAiHint(q, originalKey);
+    }
   };
 
   const selectAnswer = (questionId: string, originalKey: string) => {
