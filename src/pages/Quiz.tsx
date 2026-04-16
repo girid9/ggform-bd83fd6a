@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { shuffleArray } from "@/lib/shuffle";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { BookOpen, CheckCircle2, XCircle, ArrowRight, ArrowLeft, Loader2 } from "lucide-react";
+import { BookOpen, CheckCircle2, XCircle, ArrowRight, ArrowLeft, Loader2, Lightbulb } from "lucide-react";
 import { FloatingInput } from "@/components/FloatingInput";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 import Leaderboard from "@/components/Leaderboard";
