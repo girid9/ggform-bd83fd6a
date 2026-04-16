@@ -440,9 +440,18 @@ const Quiz = () => {
                     ) : null}
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
+                          </div>
+                        )}
+                        {/* AI hint in review */}
+                        {aiHints[q.id] && (
+                          <div className="mt-3 rounded-lg border-2 border-primary/30 bg-primary/5 p-3">
+                            <div className="flex items-start gap-2">
+                              <Lightbulb className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                              <p className="text-xs leading-relaxed text-foreground/90">{aiHints[q.id]}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
         </div>
 
         {/* Fixed bottom nav */}
