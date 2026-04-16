@@ -6,68 +6,77 @@ import { DarkModeToggle } from "@/components/DarkModeToggle";
 const Index = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-6 py-12 relative overflow-hidden page-bg">
-      <div className="absolute top-4 right-4 z-10">
+      <div className="absolute top-6 right-6 z-50">
         <DarkModeToggle />
       </div>
 
-      {/* Decorative blobs */}
-      <div className="absolute top-[-20%] right-[-20%] w-[500px] h-[500px] rounded-full bg-primary/[0.04] dark:bg-primary/[0.06] -z-10 blur-3xl" />
-      <div className="absolute bottom-[-20%] left-[-15%] w-[400px] h-[400px] rounded-full bg-primary/[0.03] dark:bg-primary/[0.04] -z-10 blur-3xl" />
-
-      <div className="text-center max-w-sm w-full space-y-8 animate-fade-up">
-        {/* Logo */}
-        <div className="space-y-5">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-primary to-emerald-500 shadow-lg shadow-primary/25">
-            <GraduationCap className="w-10 h-10 text-white" />
+      <div className="text-center max-w-lg w-full space-y-12 animate-slide-up-subtle">
+        {/* Branding */}
+        <div className="space-y-8">
+          <div className="relative inline-flex mx-auto">
+            <div className="relative inline-flex items-center justify-center w-28 h-28 border-4 border-foreground bg-background transition-transform hover:scale-105 duration-500 rounded-none">
+              <GraduationCap className="w-14 h-14 text-foreground" />
+            </div>
           </div>
-          <div>
-            <h1 className="font-display text-4xl font-extrabold tracking-tight">
-              gg<span className="gradient-text">form</span>
+          
+          <div className="space-y-4">
+            <h1 className="font-display text-6xl font-black tracking-tighter uppercase">
+              ggform
             </h1>
-            <p className="text-muted-foreground text-sm mt-3 leading-relaxed max-w-[260px] mx-auto">
-              Smart quiz platform for students and educators
+            <p className="text-foreground text-lg font-bold leading-relaxed max-w-[320px] mx-auto border-b-2 border-foreground pb-2">
+              Next-Gen MCQ Architecture
             </p>
           </div>
         </div>
 
-        {/* Feature chips */}
-        <div className="flex flex-wrap justify-center gap-2.5">
+        {/* Feature Grid */}
+        <div className="grid grid-cols-1 gap-4">
           {[
-            { icon: BookOpen, label: "Study First" },
-            { icon: Brain, label: "Then Test" },
-            { icon: Sparkles, label: "Track Progress" },
-          ].map(({ icon: Icon, label }) => (
-            <span key={label} className="chip-primary">
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </span>
+            { icon: BookOpen, label: "Phase 1: Knowledge Acquisition", desc: "Master the content with guided study" },
+            { icon: Brain, label: "Phase 2: Cognitive Testing", desc: "Validate your memory with smart filters" },
+          ].map(({ icon: Icon, label, desc }, i) => (
+            <div 
+              key={label} 
+              className="group flex items-center gap-5 p-5 bg-card border-2 border-border shadow-sm hover:border-foreground transition-all duration-300 animate-slide-up-subtle opacity-0 rounded-none cursor-default text-left"
+              style={{ animationDelay: `${200 + (i * 100)}ms`, animationFillMode: "forwards" }}
+            >
+              <div className="flex h-12 w-12 items-center justify-center border-2 border-border text-foreground transition-colors duration-300 group-hover:border-foreground group-hover:bg-foreground group-hover:text-background font-bold tracking-tighter">
+                <Icon className="w-6 h-6" />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-black uppercase tracking-widest">{label}</p>
+                <p className="text-xs text-muted-foreground font-bold mt-0.5">{desc}</p>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="pt-2 space-y-3">
-          <Link to="/admin">
+        {/* Action Center */}
+        <div className="pt-4 space-y-6">
+          <Link to="/admin" className="block">
             <Button
               size="lg"
-              className="gap-2.5 w-full h-14 text-sm btn-primary text-base"
+              className="gap-4 w-full h-16 btn-primary text-lg group rounded-none border-2 border-foreground"
             >
-              <Shield className="w-5 h-5" />
-              Tutor Dashboard
-              <ArrowRight className="w-4 h-4 ml-auto" />
+              <Shield className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+              TUTOR CONSOLE
+              <ArrowRight className="w-5 h-5 ml-auto opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </Button>
           </Link>
-          <p className="text-xs text-muted-foreground/70">
-            Students: Use the quiz link from your tutor
-          </p>
+          
+          <div className="flex items-center justify-center gap-2 text-xs text-foreground font-bold uppercase tracking-[0.2em] border-2 border-transparent p-2">
+            <Sparkles className="w-4 h-4" />
+            Enter Study Session via Invitation
+          </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-5 text-center">
-        <span className="text-[11px] text-muted-foreground/40 font-medium">
-          Made with ♥ for educators
-        </span>
-      </div>
+      <footer className="absolute bottom-8 w-full px-6 flex justify-between items-center max-w-2xl text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+        <span>© 2026 GGFORM Redesign</span>
+        <div className="h-0.5 flex-1 mx-4 bg-muted-foreground/30" />
+        <span>Cognitive Excellence</span>
+      </footer>
     </div>
   );
 };

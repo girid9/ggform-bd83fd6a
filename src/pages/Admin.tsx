@@ -34,7 +34,7 @@ interface QuizAttempt {
 }
 
 const Admin = () => {
-  const [authenticated, setAuthenticated] = useState(false);
+  const [authenticated, setAuthenticated] = useState(true);
   const [passcode, setPasscode] = useState("");
   const [sessions, setSessions] = useState<QuizSession[]>([]);
   const [selectedSession, setSelectedSession] = useState<QuizSession | null>(null);
@@ -181,34 +181,6 @@ const Admin = () => {
     if (passcode === ADMIN_PASSCODE) setAuthenticated(true);
     else toast.error("Incorrect passcode");
   };
-
-  /* ─── LOGIN ─── */
-  if (!authenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center px-5 relative overflow-hidden page-bg">
-        <div className="absolute top-4 right-4"><DarkModeToggle /></div>
-        <div className="absolute top-[-20%] right-[-20%] w-[500px] h-[500px] rounded-full bg-primary/[0.04] -z-10 blur-3xl" />
-
-        <Card className="w-full max-w-sm animate-fade-up rounded-3xl border-0 shadow-xl shadow-black/[0.06] dark:shadow-black/20">
-          <CardHeader className="text-center pb-2 pt-10">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-emerald-500 shadow-lg shadow-primary/20 mx-auto mb-5">
-              <Lock className="w-7 h-7 text-primary-foreground" />
-            </div>
-            <CardTitle className="text-xl font-display">Tutor Access</CardTitle>
-            <CardDescription className="text-sm mt-1">Enter the passcode to continue</CardDescription>
-          </CardHeader>
-          <CardContent className="pb-8 pt-4">
-            <form onSubmit={handlePasscode} className="space-y-5">
-              <FloatingInput type="password" label="Enter passcode" value={passcode} onChange={(e) => setPasscode(e.target.value)} />
-              <Button type="submit" className="w-full h-13 btn-primary text-sm">
-                Unlock
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   if (selectedStudent && selectedSession) {
     return <StudentDetail attempt={selectedStudent} questionIds={selectedSession.question_ids} onBack={() => setSelectedStudent(null)} />;

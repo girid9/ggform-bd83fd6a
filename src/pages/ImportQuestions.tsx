@@ -146,13 +146,17 @@ const ImportQuestions = () => {
     if (parsedQuestions.length === 0) return;
     setUploading(true);
     try {
+      // First, delete all existing questions to "replace" them
+      const { error: deleteError } = await supabase.from("quiz_questions").delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      if (deleteError) throw deleteError;
+
       for (let i = 0; i < parsedQuestions.length; i += 100) {
         const chunk = parsedQuestions.slice(i, i + 100);
         const { error } = await supabase.from("quiz_questions").insert(chunk);
         if (error) throw error;
       }
       setImportCount(parsedQuestions.length); setImported(true);
-      toast.success(`${parsedQuestions.length} questions imported!`);
+      toast.success(`${parsedQuestions.length} questions imported and replaced old ones!`);
     } catch (err: any) { toast.error("Import failed: " + (err.message || "Unknown error")); }
     setUploading(false);
   };
